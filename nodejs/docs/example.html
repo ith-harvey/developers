@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>example.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>example.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">const</span> AirSwap = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./AirSwap.js'</span>)
+
+<span class="hljs-keyword">const</span> config = {
+  <span class="hljs-attr">privateKey</span>: process.env.PRIVATE_KEY,
+  <span class="hljs-attr">infuraKey</span>: process.env.INFURA_KEY,
+  <span class="hljs-attr">networkId</span>: <span class="hljs-string">'mainnet'</span>,
+}
+
+<span class="hljs-keyword">const</span> airswap = <span class="hljs-keyword">new</span> AirSwap(config)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>Connect to AirSwap, then execute a callback on success</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>airswap.connect(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>Query the indexer for trade intents</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  airswap
+    .findIntents(
+      [<span class="hljs-string">'0x27054b13b1b798b345b591a4d22e6562d47ea75a'</span>], <span class="hljs-comment">// AST</span>
+      [<span class="hljs-string">'0x0000000000000000000000000000000000000000'</span>], <span class="hljs-comment">// ETH</span>
+      <span class="hljs-string">'maker'</span>, <span class="hljs-comment">// role</span>
+    )
+    .then(<span class="hljs-function"><span class="hljs-params">intents</span> =&gt;</span> {
+      <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Got Intents:'</span>, intents)
+      <span class="hljs-keyword">return</span> intents
+    })</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>Request orders from peers whose trade intents were found on the indexer</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    .then(airswap.getOrders)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p><code>orders</code> is an array of signed orders and/or errors. The order objects are already signed by the maker.
+If we want to fill an order, we just have to sign the transaction and submit it to the AirSwap smart contract</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    .then(<span class="hljs-function"><span class="hljs-params">orders</span> =&gt;</span> {
+      <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Got Orders:'</span>, orders)
+    })
+    .catch(<span class="hljs-built_in">console</span>.error)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>Publish an array of trade intents to the indexer</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  airswap
+    .setIntents([
+      {
+        <span class="hljs-attr">makerToken</span>: <span class="hljs-string">'0x27054b13b1b798b345b591a4d22e6562d47ea75a'</span>,
+        <span class="hljs-attr">takerToken</span>: <span class="hljs-string">'0x0000000000000000000000000000000000000000'</span>,
+        <span class="hljs-attr">role</span>: <span class="hljs-string">'maker'</span>,
+      },
+    ])
+    .then(<span class="hljs-built_in">console</span>.log)
+    .catch(<span class="hljs-built_in">console</span>.error)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>Implement your own methods to handle RPC calls from other peers</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  airswap.RPC_METHOD_ACTIONS.getOrder = <span class="hljs-function"><span class="hljs-params">msg</span> =&gt;</span> {
+    <span class="hljs-keyword">const</span> { makerAddress, makerAmount, makerToken, takerAddress, takerAmount, takerToken } = msg.params
+    <span class="hljs-keyword">const</span> nonce = <span class="hljs-built_in">Math</span>.round(<span class="hljs-built_in">Math</span>.random() * <span class="hljs-built_in">Date</span>.now())
+    <span class="hljs-keyword">const</span> expiration = <span class="hljs-built_in">Date</span>.now() + <span class="hljs-number">30000</span>
+
+    <span class="hljs-keyword">const</span> signedOrder = airswap.signOrder({
+      <span class="hljs-attr">makerAddress</span>: airswap.wallet.address.toLowerCase(),
+      <span class="hljs-attr">makerAmount</span>: <span class="hljs-string">'100'</span>,
+      makerToken,
+      takerAddress,
+      <span class="hljs-attr">takerAmount</span>: <span class="hljs-string">'100000'</span>,
+      takerToken,
+      nonce,
+      expiration,
+    })
+
+    airswap.call(takerAddress, { <span class="hljs-attr">id</span>: msg.id, <span class="hljs-attr">jsonrpc</span>: <span class="hljs-string">'2.0'</span>, <span class="hljs-attr">result</span>: signedOrder })
+  }
+})</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

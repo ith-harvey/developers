@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>AirSwap.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>AirSwap.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">const</span> WebSocket = <span class="hljs-built_in">require</span>(<span class="hljs-string">'ws'</span>)
+<span class="hljs-keyword">const</span> ethers = <span class="hljs-built_in">require</span>(<span class="hljs-string">'ethers'</span>)
+
+<span class="hljs-keyword">const</span> { Wallet, utils, providers } = ethers
+
+<span class="hljs-keyword">const</span> TIMEOUT = <span class="hljs-number">12000</span>
+<span class="hljs-keyword">const</span> INDEXER_ADDRESS = <span class="hljs-string">'0x0000000000000000000000000000000000000000'</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AirSwap</span> </span>{</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>privateKey: string - ethereum private key with “0x” prepended
+infuraKey: string - infura API key
+nodeAddress: string - optionally specify a geth/parity node instead of using infura
+rpcActions: Object - user defined methods; called by peers via JSON-RPC
+networkId: string - which ethereum network is used; ‘rinkeby’ or ‘mainnet’</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">constructor</span>(config) {
+    <span class="hljs-keyword">const</span> { privateKey, infuraKey, nodeAddress, rpcActions = {}, networkId = <span class="hljs-string">'rinkeby'</span> } = config
+    <span class="hljs-keyword">let</span> provider
+    <span class="hljs-keyword">if</span> (infuraKey) {
+      provider = <span class="hljs-keyword">new</span> providers.InfuraProvider(networkId === <span class="hljs-string">'mainnet'</span> ? <span class="hljs-string">'homestead'</span> : <span class="hljs-string">'rinkeby'</span>, infuraKey)
+    }
+    <span class="hljs-keyword">if</span> (nodeAddress) {
+      provider = <span class="hljs-keyword">new</span> providers.JsonRpcProvider(nodeAddress, networkId === <span class="hljs-string">'mainnet'</span> ? <span class="hljs-string">'homestead'</span> : <span class="hljs-string">'rinkeby'</span>)
+    }
+    <span class="hljs-keyword">this</span>.privKey = privateKey
+    <span class="hljs-keyword">this</span>.isAuthenticated = <span class="hljs-literal">false</span>
+    <span class="hljs-keyword">this</span>.wallet = <span class="hljs-keyword">new</span> Wallet(privateKey, provider)
+    <span class="hljs-keyword">this</span>.socketUrl =
+      networkId === <span class="hljs-string">'mainnet'</span> ? <span class="hljs-string">'wss://connect.airswap-api.com/websocket'</span> : <span class="hljs-string">'wss://sandbox.airswap-api.com/websocket'</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>Promise resolvers/rejectors and timeouts for each call</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">this</span>.RESOLVERS = {}
+    <span class="hljs-keyword">this</span>.REJECTORS = {}
+    <span class="hljs-keyword">this</span>.TIMEOUTS = {}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>User defined methods that will be invoked by peers on the JSON-RPC</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">this</span>.RPC_METHOD_ACTIONS = rpcActions
+
+    <span class="hljs-keyword">this</span>.getOrders = <span class="hljs-keyword">this</span>.getOrders.bind(<span class="hljs-keyword">this</span>)
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>Prepare a formatted query to be submitted as a JSON-RPC call</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">static</span> makeRPC(method, params = {}, id = <span class="hljs-built_in">Date</span>.now()) {
+    <span class="hljs-keyword">return</span> {
+      <span class="hljs-attr">jsonrpc</span>: <span class="hljs-string">'2.0'</span>,
+      method,
+      params,
+      id,
+    }
+  }
+
+  <span class="hljs-comment">/*
+  * Connect to AirSwap. The sequence:
+  * 1. Open a websocket connection
+  * 2. Receive a challenge (some random data to sign)
+  * 3. Sign the data and send it back over the wire
+  * 4. Receive an "ok" and start sending and receiving RPC
+  * Optionally pass an `onSuccess` function
+  */</span>
+  connect(onSuccess) {
+    <span class="hljs-keyword">this</span>.socket = <span class="hljs-keyword">new</span> WebSocket(<span class="hljs-keyword">this</span>.socketUrl)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>Received a message</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">this</span>.socket.onmessage = <span class="hljs-function"><span class="hljs-params">event</span> =&gt;</span> {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>We are authenticating.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="hljs-keyword">if</span> (!<span class="hljs-keyword">this</span>.isAuthenticated) {
+        <span class="hljs-keyword">switch</span> (event.data) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p>We have completed the challenge.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>          <span class="hljs-keyword">case</span> <span class="hljs-string">'ok'</span>:
+            <span class="hljs-keyword">this</span>.isAuthenticated = <span class="hljs-literal">true</span>
+            <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> onSuccess === <span class="hljs-string">'function'</span>) {
+              onSuccess()
+            }
+            <span class="hljs-keyword">break</span>
+          <span class="hljs-keyword">case</span> <span class="hljs-string">'not authorized'</span>:
+            <span class="hljs-built_in">console</span>.error(<span class="hljs-string">'Address is not authorized.'</span>)
+            <span class="hljs-keyword">break</span>
+          <span class="hljs-keyword">default</span>:</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <p>We have been issued a challenge.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="hljs-keyword">const</span> signature = <span class="hljs-keyword">this</span>.wallet.signMessage(event.data)
+            <span class="hljs-keyword">this</span>.socket.send(signature)
+        }
+      } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.isAuthenticated) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <p>We are already authenticated and are receiving an RPC.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="hljs-keyword">let</span> payload
+        <span class="hljs-keyword">let</span> message
+
+        <span class="hljs-keyword">try</span> {
+          payload = <span class="hljs-built_in">JSON</span>.parse(event.data)
+          message = payload.message &amp;&amp; <span class="hljs-built_in">JSON</span>.parse(payload.message)
+        } <span class="hljs-keyword">catch</span> (e) {
+          <span class="hljs-built_in">console</span>.error(<span class="hljs-string">'Error parsing payload'</span>, e, payload)
+        }
+
+        <span class="hljs-keyword">if</span> (!payload || !message) {
+          <span class="hljs-keyword">return</span>
+        }
+
+        <span class="hljs-keyword">if</span> (message.method) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <p>Another peer is invoking a method.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>          <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span>.RPC_METHOD_ACTIONS[message.method]) {
+            <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Invoking method'</span>, message.method)
+            <span class="hljs-keyword">this</span>.RPC_METHOD_ACTIONS[message.method](message)
+          }
+        } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (message.id) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <p>We have received a response from a method call.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>          <span class="hljs-keyword">const</span> isError = <span class="hljs-built_in">Object</span>.prototype.hasOwnProperty.call(message, <span class="hljs-string">'error'</span>)
+
+          <span class="hljs-keyword">if</span> (!isError &amp;&amp; message.result) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-13">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-13">&#182;</a>
+              </div>
+              <p>Resolve the call if a resolver exists.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> <span class="hljs-keyword">this</span>.RESOLVERS[message.id] === <span class="hljs-string">'function'</span>) {
+              <span class="hljs-keyword">this</span>.RESOLVERS[message.id](message.result)
+            }
+          } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (isError) {</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-14">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-14">&#182;</a>
+              </div>
+              <p>Reject the call if a resolver exists.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> <span class="hljs-keyword">this</span>.REJECTORS[message.id] === <span class="hljs-string">'function'</span>) {
+              <span class="hljs-keyword">this</span>.REJECTORS[message.id](message.error)
+            }
+          }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-15">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-15">&#182;</a>
+              </div>
+              <p>Call lifecycle finished; tear down resolver, rejector, and timeout</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>          <span class="hljs-keyword">delete</span> <span class="hljs-keyword">this</span>.RESOLVERS[message.id]
+          <span class="hljs-keyword">delete</span> <span class="hljs-keyword">this</span>.REJECTORS[message.id]
+          clearTimeout(<span class="hljs-keyword">this</span>.TIMEOUTS[message.id])
+        }
+      }
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-16">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-16">&#182;</a>
+              </div>
+              <p>There was an error on the connection</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">this</span>.socket.onerror = <span class="hljs-function"><span class="hljs-params">event</span> =&gt;</span> {
+      <span class="hljs-built_in">console</span>.error(<span class="hljs-string">'socket error'</span>, event)
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-17">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-17">&#182;</a>
+              </div>
+              <p>The connection was closed</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">this</span>.socket.onclose = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+      <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'socket closed'</span>)
+    }
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-18">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-18">&#182;</a>
+              </div>
+              <p>Send a JSON-RPC <code>message</code> to a <code>receiver</code> address</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  call(receiver, message, resolve, reject) {
+    <span class="hljs-keyword">const</span> messageString = <span class="hljs-built_in">JSON</span>.stringify({
+      <span class="hljs-attr">sender</span>: <span class="hljs-keyword">this</span>.wallet.address.toLowerCase(),
+      receiver,
+      <span class="hljs-attr">message</span>: <span class="hljs-built_in">JSON</span>.stringify(message),
+      <span class="hljs-attr">id</span>: <span class="hljs-built_in">Date</span>.now(),
+    })
+    <span class="hljs-keyword">this</span>.socket.send(messageString)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-19">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-19">&#182;</a>
+              </div>
+              <p>Set the promise resolvers and rejectors for this call</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> resolve === <span class="hljs-string">'function'</span>) {
+      <span class="hljs-keyword">this</span>.RESOLVERS[message.id] = resolve
+    }
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> reject === <span class="hljs-string">'function'</span>) {
+      <span class="hljs-keyword">this</span>.REJECTORS[message.id] = reject
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-20">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-20">&#182;</a>
+              </div>
+              <p>Set a timeout for this call</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">this</span>.TIMEOUTS[message.id] = setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+      <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> reject === <span class="hljs-string">'function'</span>) {
+        reject({ <span class="hljs-attr">message</span>: <span class="hljs-string">`Request timed out. [<span class="hljs-subst">${message.id}</span>]`</span>, <span class="hljs-attr">code</span>: <span class="hljs-number">-1</span> })
+      }
+    }, TIMEOUT)
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-21">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-21">&#182;</a>
+              </div>
+              <p>Query the indexer for trade intents.
+Returns a promise which is resolved with an array of <code>intents</code></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  findIntents(makerTokens, takerTokens, role = <span class="hljs-string">'maker'</span>) {
+    <span class="hljs-keyword">if</span> (!makerTokens || !takerTokens) {
+      <span class="hljs-keyword">return</span>
+    }
+    <span class="hljs-keyword">const</span> payload = AirSwap.makeRPC(<span class="hljs-string">'findIntents'</span>, {
+      makerTokens,
+      takerTokens,
+      role,
+    })
+
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve, reject</span>) =&gt;</span> <span class="hljs-keyword">this</span>.call(INDEXER_ADDRESS, payload, resolve, reject))
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-22">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-22">&#182;</a>
+              </div>
+              <p>Call <code>setIntents</code> on the indexer with an array of trade <code>intent</code> objects</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  setIntents(intents) {
+    <span class="hljs-keyword">const</span> payload = AirSwap.makeRPC(<span class="hljs-string">'setIntents'</span>, {
+      <span class="hljs-attr">address</span>: <span class="hljs-keyword">this</span>.wallet.address.toLowerCase(),
+      intents,
+    })
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve, reject</span>) =&gt;</span> <span class="hljs-keyword">this</span>.call(INDEXER_ADDRESS, payload, resolve, reject))
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-23">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-23">&#182;</a>
+              </div>
+              <p>Make a JSON-RPC <code>getOrder</code> call for each <code>intent</code></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  getOrders(intents, makerAmount = <span class="hljs-string">'100000'</span>) {
+    <span class="hljs-keyword">if</span> (!intents) {
+      <span class="hljs-keyword">return</span>
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">Promise</span>.all(
+      intents.map(<span class="hljs-function">(<span class="hljs-params">{ address, makerToken, takerToken }</span>) =&gt;</span> {
+        <span class="hljs-keyword">const</span> payload = AirSwap.makeRPC(<span class="hljs-string">'getOrder'</span>, {
+          makerToken,
+          takerToken,
+          <span class="hljs-attr">takerAddress</span>: <span class="hljs-keyword">this</span>.wallet.address.toLowerCase(),
+          makerAmount,
+        })</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-24">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-24">&#182;</a>
+              </div>
+              <p><code>Promise.all</code> will return a complete array of resolved promises, or just the first rejection if a promise fails.
+To mitigate this, we <code>catch</code> errors on individual promises so that <code>Promise.all</code> always returns a complete array</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve, reject</span>) =&gt;</span> <span class="hljs-keyword">this</span>.call(address, payload, resolve, reject)).catch(<span class="hljs-function"><span class="hljs-params">e</span> =&gt;</span> e)
+      }),
+    )
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-25">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-25">&#182;</a>
+              </div>
+              <p>Sign an order for a taker to fill</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  signOrder({ makerAddress, makerAmount, makerToken, takerAddress, takerAmount, takerToken, nonce, expiration }) {
+    <span class="hljs-keyword">const</span> types = [
+      <span class="hljs-string">'address'</span>, <span class="hljs-comment">// makerAddress</span>
+      <span class="hljs-string">'uint256'</span>, <span class="hljs-comment">// makerAmount</span>
+      <span class="hljs-string">'address'</span>, <span class="hljs-comment">// makerToken</span>
+      <span class="hljs-string">'address'</span>, <span class="hljs-comment">// takerAddress</span>
+      <span class="hljs-string">'uint256'</span>, <span class="hljs-comment">// takerAmount</span>
+      <span class="hljs-string">'address'</span>, <span class="hljs-comment">// takertoken</span>
+      <span class="hljs-string">'uint256'</span>, <span class="hljs-comment">// nonce</span>
+      <span class="hljs-string">'uint256'</span>, <span class="hljs-comment">// expiration</span>
+    ]
+    <span class="hljs-keyword">const</span> hashedOrder = utils.solidityKeccak256(types, [
+      makerAddress,
+      makerAmount,
+      makerToken,
+      takerAddress,
+      takerAmount,
+      takerToken,
+      nonce,
+      expiration,
+    ])
+
+    <span class="hljs-keyword">const</span> signature = <span class="hljs-keyword">this</span>.wallet.signMessage(ethers.utils.arrayify(hashedOrder))
+    <span class="hljs-keyword">const</span> walletSignature = signature.substr(<span class="hljs-number">2</span>, signature.length)
+
+    <span class="hljs-keyword">return</span> {
+      expiration,
+      makerAddress,
+      makerAmount,
+      makerToken,
+      nonce,
+      takerAddress,
+      takerAmount,
+      takerToken,
+      <span class="hljs-attr">r</span>: <span class="hljs-string">`0x<span class="hljs-subst">${walletSignature.substr(<span class="hljs-number">0</span>, <span class="hljs-number">64</span>)}</span>`</span>,
+      <span class="hljs-attr">s</span>: <span class="hljs-string">`0x<span class="hljs-subst">${walletSignature.substr(<span class="hljs-number">64</span>, <span class="hljs-number">64</span>)}</span>`</span>,
+      <span class="hljs-attr">v</span>: <span class="hljs-built_in">parseFloat</span>(walletSignature.substr(<span class="hljs-number">128</span>, <span class="hljs-number">2</span>)) + <span class="hljs-number">27</span>,
+    }
+  }
+}
+
+<span class="hljs-built_in">module</span>.exports = AirSwap</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

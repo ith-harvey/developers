@@ -1,0 +1,11 @@
+{
+  "name": "api-example-node",
+  "version": "1.0.0",
+  "description": "AirSwap Node.js API Example",
+  "main": "example.js",
+  "author": "graham@airswap.io",
+  "dependencies": {
+    "ethers": "^3.0.19",
+    "ws": "^5.2.0"
+  }
+}

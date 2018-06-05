@@ -7,11 +7,11 @@ const TIMEOUT = 12000
 const INDEXER_ADDRESS = '0x0000000000000000000000000000000000000000'
 
 class AirSwap {
-  // privateKey: string - ethereum private key with "0x" prepended
-  // infuraKey: string - infura API key
-  // nodeAddress: string - optionally specify a geth/parity node instead of using infura
-  // rpcActions: Object - user defined methods; called by peers via JSON-RPC
-  // networkId: string - which ethereum network is used; 'rinkeby' or 'mainnet'
+  // `privateKey`: string - ethereum private key with `"0x"` prepended
+  // `infuraKey`: string - infura API key
+  // `nodeAddress`: string - optionally specify a geth/parity node instead of using infura
+  // `rpcActions`: Object - user defined methods; called by peers via JSON-RPC
+  // `networkId`: string - which ethereum network is used; `'rinkeby'` or `'mainnet'`
   constructor(config) {
     const { privateKey, infuraKey, nodeAddress, rpcActions = {}, networkId = 'rinkeby' } = config
     let provider
@@ -48,14 +48,12 @@ class AirSwap {
     }
   }
 
-  /*
-  * Connect to AirSwap. The sequence:
-  * 1. Open a websocket connection
-  * 2. Receive a challenge (some random data to sign)
-  * 3. Sign the data and send it back over the wire
-  * 4. Receive an "ok" and start sending and receiving RPC
-  * Optionally pass an `onSuccess` function
-  */
+  // Connect to AirSwap. The sequence:
+  // 1. Open a websocket connection
+  // 2. Receive a challenge (some random data to sign)
+  //  3. Sign the data and send it back over the wire
+  // 4. Receive an "ok" and start sending and receiving RPC
+  // Optionally pass an `onSuccess` function
   connect(onSuccess) {
     this.socket = new WebSocket(this.socketUrl)
 

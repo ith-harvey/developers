@@ -46,7 +46,7 @@ The AirSwap Trading API is an implementation of the [Swap Protocol](https://swap
 The [Swap Protocol](https://swap.tech/whitepaper) outlines peer-to-peer protocols for trading Ethereum-based assets that conform to the [ERC-20](https://en.wikipedia.org/wiki/ERC20) token standard. The protocol whitepaper does not specify the transports or data formats to be used in order to remain flexible. However, our implementation, [AirSwap](https://airswap.io/), does conform to the specifications described below.
 
 ### Quick start
-For a quick start, take a look at the `Python` examples found in the [python](python) folder.
+For a quick start, take a look at the `Python` or `Node.js` examples found in the [python](python) or [nodejs](nodejs) folders.
 
 ### Concepts
 
@@ -255,7 +255,7 @@ And its response, simply an "ok" if all goes well:
 ```
 
 ### getIntents
-You can fetch the intent configuration for any peer to see what they've announced for trade. For an example of how to call `getIntents` on the Indexer, see [indexer_example.py](python/indexer_example.py).
+You can fetch the intent configuration for any peer to see what they've announced for trade. For an example of how to call `getIntents` on the Indexer, see [indexer_example.py](python/indexer_example.py) or [example.js](nodejs/example.js).
 
 **Parameters**
 * `address`: A **lowercased** Ethereum address to fetch intent for.

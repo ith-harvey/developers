@@ -39,9 +39,7 @@
 <span class="hljs-keyword">const</span> { Contract, Wallet, utils, providers } = ethers
 
 <span class="hljs-keyword">const</span> TIMEOUT = <span class="hljs-number">12000</span>
-<span class="hljs-keyword">const</span> INDEXER_ADDRESS = <span class="hljs-string">'0x0000000000000000000000000000000000000000'</span>
-
-<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AirSwap</span> </span>{</pre></div></div>
+<span class="hljs-keyword">const</span> INDEXER_ADDRESS = <span class="hljs-string">'0x0000000000000000000000000000000000000000'</span></pre></div></div>
             
         </li>
         
@@ -52,17 +50,9 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-2">&#182;</a>
               </div>
-              <p><code>privateKey</code>: string - ethereum private key with <code>&quot;0x&quot;</code> prepended
-<code>infuraKey</code>: string - infura API key
-<code>nodeAddress</code>: string - optionally specify a geth/parity node instead of using infura
-<code>rpcActions</code>: Object - user defined methods; called by peers via JSON-RPC
-<code>networkId</code>: string - which ethereum network is used; <code>&#39;rinkeby&#39;</code> or <code>&#39;mainnet&#39;</code></p>
+              <h2 id="class-constructor">Class Constructor</h2>
 
             </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">constructor</span>(config) {
-    <span class="hljs-keyword">const</span> { privateKey, infuraKey, nodeAddress, rpcActions = {}, networkId = <span class="hljs-string">'rinkeby'</span> } = config
-    <span class="hljs-keyword">const</span> networkName = networkId === <span class="hljs-string">'mainnet'</span> ? <span class="hljs-string">'homestead'</span> : <span class="hljs-string">'rinkeby'</span></pre></div></div>
             
         </li>
         
@@ -73,11 +63,10 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-3">&#182;</a>
               </div>
-              <p>Create infura provider by default</p>
-
+              
             </div>
             
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">let</span> provider = <span class="hljs-keyword">new</span> providers.InfuraProvider(networkName, infuraKey)</pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AirSwap</span> </span>{</pre></div></div>
             
         </li>
         
@@ -88,11 +77,9 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-4">&#182;</a>
               </div>
-              <p>If user specified, use a geth/parity node instead</p>
+              <p><code>privateKey</code>: string - ethereum private key with <code>&quot;0x&quot;</code> prepended</p>
 
             </div>
-            
-            <div class="content"><div class='highlight'><pre>    provider = nodeAddress ? <span class="hljs-keyword">new</span> providers.JsonRpcProvider(nodeAddress, networkName) : provider</pre></div></div>
             
         </li>
         
@@ -103,11 +90,9 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-5">&#182;</a>
               </div>
-              <p>Create an ethereum wallet object for signing orders</p>
+              <p><code>infuraKey</code>: string - infura API key</p>
 
             </div>
-            
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">this</span>.wallet = <span class="hljs-keyword">new</span> Wallet(privateKey, provider)</pre></div></div>
             
         </li>
         
@@ -117,6 +102,95 @@
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p><code>nodeAddress</code>: string - optionally specify a geth/parity node instead of using infura</p>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p><code>rpcActions</code>: Object - user defined methods; called by peers via JSON-RPC</p>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p><code>networkId</code>: string - which ethereum network is used; <code>&#39;rinkeby&#39;</code> or <code>&#39;mainnet&#39;</code></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>
+  <span class="hljs-keyword">constructor</span>(config) {
+    <span class="hljs-keyword">const</span> { privateKey, infuraKey, nodeAddress, rpcActions = {}, networkId = <span class="hljs-string">'rinkeby'</span> } = config
+    <span class="hljs-keyword">const</span> networkName = networkId === <span class="hljs-string">'mainnet'</span> ? <span class="hljs-string">'homestead'</span> : <span class="hljs-string">'rinkeby'</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <p>Create infura provider by default</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">let</span> provider = <span class="hljs-keyword">new</span> providers.InfuraProvider(networkName, infuraKey)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <p>If user specified, use a geth/parity node instead</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    provider = nodeAddress ? <span class="hljs-keyword">new</span> providers.JsonRpcProvider(nodeAddress, networkName) : provider</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <p>Create an ethereum wallet object for signing orders</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">this</span>.wallet = <span class="hljs-keyword">new</span> Wallet(privateKey, provider)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
               </div>
               <p>Create an AirSwap contract object based on environment</p>
 
@@ -130,11 +204,11 @@
         </li>
         
         
-        <li id="section-7">
+        <li id="section-13">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-7">&#182;</a>
+                <a class="pilcrow" href="#section-13">&#182;</a>
               </div>
               <p>Create a W-ETH contract object based on environment</p>
 
@@ -148,11 +222,11 @@
         </li>
         
         
-        <li id="section-8">
+        <li id="section-14">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-8">&#182;</a>
+                <a class="pilcrow" href="#section-14">&#182;</a>
               </div>
               <p>Set the websocket url based on environment</p>
 
@@ -166,11 +240,11 @@
         </li>
         
         
-        <li id="section-9">
+        <li id="section-15">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-9">&#182;</a>
+                <a class="pilcrow" href="#section-15">&#182;</a>
               </div>
               <p>Websocket authentication state</p>
 
@@ -181,11 +255,11 @@
         </li>
         
         
-        <li id="section-10">
+        <li id="section-16">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-10">&#182;</a>
+                <a class="pilcrow" href="#section-16">&#182;</a>
               </div>
               <p>Promise resolvers/rejectors and timeouts for each call</p>
 
@@ -198,11 +272,11 @@
         </li>
         
         
-        <li id="section-11">
+        <li id="section-17">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-11">&#182;</a>
+                <a class="pilcrow" href="#section-17">&#182;</a>
               </div>
               <p>User defined methods that will be invoked by peers on the JSON-RPC</p>
 
@@ -217,123 +291,13 @@
         </li>
         
         
-        <li id="section-12">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-12">&#182;</a>
-              </div>
-              <h2 id="rpc-methods">RPC Methods</h2>
-
-            </div>
-            
-        </li>
-        
-        
-        <li id="section-13">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-13">&#182;</a>
-              </div>
-              
-            </div>
-            
-        </li>
-        
-        
-        <li id="section-14">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-14">&#182;</a>
-              </div>
-              <p>Prepare a formatted query to be submitted as a JSON-RPC call</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">static</span> makeRPC(method, params = {}, id = <span class="hljs-built_in">Date</span>.now()) {
-    <span class="hljs-keyword">return</span> {
-      <span class="hljs-attr">jsonrpc</span>: <span class="hljs-string">'2.0'</span>,
-      method,
-      params,
-      id,
-    }
-  }</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-15">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-15">&#182;</a>
-              </div>
-              <p>Send a JSON-RPC <code>message</code> to a <code>receiver</code> address
-Optionally pass <code>resolve</code> and <code>reject</code> callbacks to handle a response</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  call(receiver, message, resolve, reject) {
-    <span class="hljs-keyword">const</span> messageString = <span class="hljs-built_in">JSON</span>.stringify({
-      <span class="hljs-attr">sender</span>: <span class="hljs-keyword">this</span>.wallet.address.toLowerCase(),
-      receiver,
-      <span class="hljs-attr">message</span>: <span class="hljs-built_in">JSON</span>.stringify(message),
-      <span class="hljs-attr">id</span>: <span class="hljs-built_in">Date</span>.now(),
-    })
-    <span class="hljs-keyword">this</span>.socket.send(messageString)</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-16">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-16">&#182;</a>
-              </div>
-              <p>Set the promise resolvers and rejectors for this call</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> resolve === <span class="hljs-string">'function'</span>) {
-      <span class="hljs-keyword">this</span>.RESOLVERS[message.id] = resolve
-    }
-    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> reject === <span class="hljs-string">'function'</span>) {
-      <span class="hljs-keyword">this</span>.REJECTORS[message.id] = reject
-    }</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-17">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-17">&#182;</a>
-              </div>
-              <p>Set a timeout for this call</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">this</span>.TIMEOUTS[message.id] = setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
-      <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> reject === <span class="hljs-string">'function'</span>) {
-        reject({ <span class="hljs-attr">message</span>: <span class="hljs-string">`Request timed out. [<span class="hljs-subst">${message.id}</span>]`</span>, <span class="hljs-attr">code</span>: <span class="hljs-number">-1</span> })
-      }
-    }, TIMEOUT)
-  }</pre></div></div>
-            
-        </li>
-        
-        
         <li id="section-18">
             <div class="annotation">
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-18">&#182;</a>
               </div>
-              <h2 id="websocket-interaction">WebSocket Interaction</h2>
+              <h2 id="rpc-methods">RPC Methods</h2>
 
             </div>
             
@@ -358,15 +322,122 @@ Optionally pass <code>resolve</code> and <code>reject</code> callbacks to handle
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-20">&#182;</a>
               </div>
+              <p>Prepare a formatted query to be submitted as a JSON-RPC call</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">static</span> makeRPC(method, params = {}, id = <span class="hljs-built_in">Date</span>.now()) {
+    <span class="hljs-keyword">return</span> {
+      <span class="hljs-attr">jsonrpc</span>: <span class="hljs-string">'2.0'</span>,
+      method,
+      params,
+      id,
+    }
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-21">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-21">&#182;</a>
+              </div>
+              <p>Send a JSON-RPC <code>message</code> to a <code>receiver</code> address.
+Optionally pass <code>resolve</code> and <code>reject</code> callbacks to handle a response</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  call(receiver, message, resolve, reject) {
+    <span class="hljs-keyword">const</span> messageString = <span class="hljs-built_in">JSON</span>.stringify({
+      <span class="hljs-attr">sender</span>: <span class="hljs-keyword">this</span>.wallet.address.toLowerCase(),
+      receiver,
+      <span class="hljs-attr">message</span>: <span class="hljs-built_in">JSON</span>.stringify(message),
+      <span class="hljs-attr">id</span>: <span class="hljs-built_in">Date</span>.now(),
+    })
+    <span class="hljs-keyword">this</span>.socket.send(messageString)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-22">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-22">&#182;</a>
+              </div>
+              <p>Set the promise resolvers and rejectors for this call</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> resolve === <span class="hljs-string">'function'</span>) {
+      <span class="hljs-keyword">this</span>.RESOLVERS[message.id] = resolve
+    }
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> reject === <span class="hljs-string">'function'</span>) {
+      <span class="hljs-keyword">this</span>.REJECTORS[message.id] = reject
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-23">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-23">&#182;</a>
+              </div>
+              <p>Set a timeout for this call</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">this</span>.TIMEOUTS[message.id] = setTimeout(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+      <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> reject === <span class="hljs-string">'function'</span>) {
+        reject({ <span class="hljs-attr">message</span>: <span class="hljs-string">`Request timed out. [<span class="hljs-subst">${message.id}</span>]`</span>, <span class="hljs-attr">code</span>: <span class="hljs-number">-1</span> })
+      }
+    }, TIMEOUT)
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-24">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-24">&#182;</a>
+              </div>
+              <h2 id="websocket-interaction">WebSocket Interaction</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-25">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-25">&#182;</a>
+              </div>
+              
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-26">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-26">&#182;</a>
+              </div>
               <p>Connect to AirSwap by opening websocket. The sequence:</p>
 <ol>
 <li>Open a websocket connection</li>
-<li>Receive a challenge (some random data to sign)<ol start="3">
+<li>Receive a challenge (some random data to sign)</li>
 <li>Sign the data and send it back over the wire</li>
-</ol>
-</li>
-<li>Receive an “ok” and start sending and receiving RPC
-Optionally pass an <code>onSuccess</code> function</li>
+<li>Receive an “ok” and start sending and receiving RPC</li>
 </ol>
 
             </div>
@@ -377,11 +448,11 @@ Optionally pass an <code>onSuccess</code> function</li>
         </li>
         
         
-        <li id="section-21">
+        <li id="section-27">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-21">&#182;</a>
+                <a class="pilcrow" href="#section-27">&#182;</a>
               </div>
               <p>Check socket health every 30 seconds</p>
 
@@ -406,11 +477,11 @@ Optionally pass an <code>onSuccess</code> function</li>
         </li>
         
         
-        <li id="section-22">
+        <li id="section-28">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-22">&#182;</a>
+                <a class="pilcrow" href="#section-28">&#182;</a>
               </div>
               <p>The connection was closed</p>
 
@@ -425,11 +496,11 @@ Optionally pass an <code>onSuccess</code> function</li>
         </li>
         
         
-        <li id="section-23">
+        <li id="section-29">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-23">&#182;</a>
+                <a class="pilcrow" href="#section-29">&#182;</a>
               </div>
               <p>There was an error on the connection</p>
 
@@ -442,11 +513,11 @@ Optionally pass an <code>onSuccess</code> function</li>
         </li>
         
         
-        <li id="section-24">
+        <li id="section-30">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-24">&#182;</a>
+                <a class="pilcrow" href="#section-30">&#182;</a>
               </div>
               <p>Promisify the <code>onmessage</code> handler. Allows us to return information
 about the connection state after the authentication handshake</p>
@@ -458,11 +529,11 @@ about the connection state after the authentication handshake</p>
         </li>
         
         
-        <li id="section-25">
+        <li id="section-31">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-25">&#182;</a>
+                <a class="pilcrow" href="#section-31">&#182;</a>
               </div>
               <p>Received a message</p>
 
@@ -473,11 +544,11 @@ about the connection state after the authentication handshake</p>
         </li>
         
         
-        <li id="section-26">
+        <li id="section-32">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-26">&#182;</a>
+                <a class="pilcrow" href="#section-32">&#182;</a>
               </div>
               <p>We are authenticating</p>
 
@@ -489,11 +560,11 @@ about the connection state after the authentication handshake</p>
         </li>
         
         
-        <li id="section-27">
+        <li id="section-33">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-27">&#182;</a>
+                <a class="pilcrow" href="#section-33">&#182;</a>
               </div>
               <p>We have completed the challenge.</p>
 
@@ -512,11 +583,11 @@ about the connection state after the authentication handshake</p>
         </li>
         
         
-        <li id="section-28">
+        <li id="section-34">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-28">&#182;</a>
+                <a class="pilcrow" href="#section-34">&#182;</a>
               </div>
               <p>We have been issued a challenge.</p>
 
@@ -530,11 +601,11 @@ about the connection state after the authentication handshake</p>
         </li>
         
         
-        <li id="section-29">
+        <li id="section-35">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-29">&#182;</a>
+                <a class="pilcrow" href="#section-35">&#182;</a>
               </div>
               <p>We are already authenticated and are receiving an RPC.</p>
 
@@ -559,11 +630,11 @@ about the connection state after the authentication handshake</p>
         </li>
         
         
-        <li id="section-30">
+        <li id="section-36">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-30">&#182;</a>
+                <a class="pilcrow" href="#section-36">&#182;</a>
               </div>
               <p>Another peer is invoking a method.</p>
 
@@ -577,11 +648,11 @@ about the connection state after the authentication handshake</p>
         </li>
         
         
-        <li id="section-31">
+        <li id="section-37">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-31">&#182;</a>
+                <a class="pilcrow" href="#section-37">&#182;</a>
               </div>
               <p>We have received a response from a method call.</p>
 
@@ -594,11 +665,11 @@ about the connection state after the authentication handshake</p>
         </li>
         
         
-        <li id="section-32">
+        <li id="section-38">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-32">&#182;</a>
+                <a class="pilcrow" href="#section-38">&#182;</a>
               </div>
               <p>Resolve the call if a resolver exists.</p>
 
@@ -612,11 +683,11 @@ about the connection state after the authentication handshake</p>
         </li>
         
         
-        <li id="section-33">
+        <li id="section-39">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-33">&#182;</a>
+                <a class="pilcrow" href="#section-39">&#182;</a>
               </div>
               <p>Reject the call if a resolver exists.</p>
 
@@ -630,11 +701,11 @@ about the connection state after the authentication handshake</p>
         </li>
         
         
-        <li id="section-34">
+        <li id="section-40">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-34">&#182;</a>
+                <a class="pilcrow" href="#section-40">&#182;</a>
               </div>
               <p>Call lifecycle finished; tear down resolver, rejector, and timeout</p>
 
@@ -652,11 +723,11 @@ about the connection state after the authentication handshake</p>
         </li>
         
         
-        <li id="section-35">
+        <li id="section-41">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-35">&#182;</a>
+                <a class="pilcrow" href="#section-41">&#182;</a>
               </div>
               <p>Disconnect from AirSwap by closing websocket</p>
 
@@ -669,131 +740,13 @@ about the connection state after the authentication handshake</p>
         </li>
         
         
-        <li id="section-36">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-36">&#182;</a>
-              </div>
-              <h2 id="interacting-with-the-indexer">Interacting with the Indexer</h2>
-
-            </div>
-            
-        </li>
-        
-        
-        <li id="section-37">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-37">&#182;</a>
-              </div>
-              
-            </div>
-            
-        </li>
-        
-        
-        <li id="section-38">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-38">&#182;</a>
-              </div>
-              <p>Query the indexer for trade intents.
-Returns a promise which is resolved with an array of <code>intents</code></p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  findIntents(makerTokens, takerTokens, role = <span class="hljs-string">'maker'</span>) {
-    <span class="hljs-keyword">if</span> (!makerTokens || !takerTokens) {
-      <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'missing arguments makerTokens or takerTokens'</span>)
-    }
-    <span class="hljs-keyword">const</span> payload = AirSwap.makeRPC(<span class="hljs-string">'findIntents'</span>, {
-      makerTokens,
-      takerTokens,
-      role,
-    })
-
-    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve, reject</span>) =&gt;</span> <span class="hljs-keyword">this</span>.call(INDEXER_ADDRESS, payload, resolve, reject))
-  }</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-39">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-39">&#182;</a>
-              </div>
-              <p>Call <code>setIntents</code> on the indexer with an array of trade <code>intent</code> objects</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  setIntents(intents) {
-    <span class="hljs-keyword">const</span> payload = AirSwap.makeRPC(<span class="hljs-string">'setIntents'</span>, {
-      <span class="hljs-attr">address</span>: <span class="hljs-keyword">this</span>.wallet.address.toLowerCase(),
-      intents,
-    })
-    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve, reject</span>) =&gt;</span> <span class="hljs-keyword">this</span>.call(INDEXER_ADDRESS, payload, resolve, reject))
-  }</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-40">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-40">&#182;</a>
-              </div>
-              <p>Make a JSON-RPC <code>getOrder</code> call for each <code>intent</code></p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  getOrders(intents, makerAmount) {
-    <span class="hljs-keyword">if</span> (!<span class="hljs-built_in">Array</span>.isArray(intents) || !makerAmount) {
-      <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'bad arguments passed to getOrders'</span>)
-    }
-    <span class="hljs-keyword">return</span> <span class="hljs-built_in">Promise</span>.all(
-      intents.map(<span class="hljs-function">(<span class="hljs-params">{ address, makerToken, takerToken }</span>) =&gt;</span> {
-        <span class="hljs-keyword">const</span> payload = AirSwap.makeRPC(<span class="hljs-string">'getOrder'</span>, {
-          makerToken,
-          takerToken,
-          <span class="hljs-attr">takerAddress</span>: <span class="hljs-keyword">this</span>.wallet.address.toLowerCase(),
-          <span class="hljs-attr">makerAmount</span>: <span class="hljs-built_in">String</span>(makerAmount),
-        })</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-41">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-41">&#182;</a>
-              </div>
-              <p><code>Promise.all</code> will return a complete array of resolved promises, or just the first rejection if a promise fails.
-To mitigate this, we <code>catch</code> errors on individual promises so that <code>Promise.all</code> always returns a complete array</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function">(<span class="hljs-params">res, rej</span>) =&gt;</span> <span class="hljs-keyword">this</span>.call(address, payload, res, rej)).catch(<span class="hljs-function"><span class="hljs-params">e</span> =&gt;</span> e)
-      }),
-    )
-  }</pre></div></div>
-            
-        </li>
-        
-        
         <li id="section-42">
             <div class="annotation">
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-42">&#182;</a>
               </div>
-              <h2 id="interacting-with-ethereum">Interacting with Ethereum</h2>
+              <h2 id="interacting-with-the-indexer">Interacting with the Indexer</h2>
 
             </div>
             
@@ -817,6 +770,124 @@ To mitigate this, we <code>catch</code> errors on individual promises so that <c
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-44">&#182;</a>
+              </div>
+              <p>Query the indexer for trade intents.
+Returns a promise which is resolved with an array of <code>intents</code></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  findIntents(makerTokens, takerTokens, role = <span class="hljs-string">'maker'</span>) {
+    <span class="hljs-keyword">if</span> (!makerTokens || !takerTokens) {
+      <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'missing arguments makerTokens or takerTokens'</span>)
+    }
+    <span class="hljs-keyword">const</span> payload = AirSwap.makeRPC(<span class="hljs-string">'findIntents'</span>, {
+      makerTokens,
+      takerTokens,
+      role,
+    })
+
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve, reject</span>) =&gt;</span> <span class="hljs-keyword">this</span>.call(INDEXER_ADDRESS, payload, resolve, reject))
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-45">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-45">&#182;</a>
+              </div>
+              <p>Call <code>setIntents</code> on the indexer with an array of trade <code>intent</code> objects</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  setIntents(intents) {
+    <span class="hljs-keyword">const</span> payload = AirSwap.makeRPC(<span class="hljs-string">'setIntents'</span>, {
+      <span class="hljs-attr">address</span>: <span class="hljs-keyword">this</span>.wallet.address.toLowerCase(),
+      intents,
+    })
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve, reject</span>) =&gt;</span> <span class="hljs-keyword">this</span>.call(INDEXER_ADDRESS, payload, resolve, reject))
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-46">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-46">&#182;</a>
+              </div>
+              <p>Make a JSON-RPC <code>getOrder</code> call for each <code>intent</code></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  getOrders(intents, makerAmount) {
+    <span class="hljs-keyword">if</span> (!<span class="hljs-built_in">Array</span>.isArray(intents) || !makerAmount) {
+      <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'bad arguments passed to getOrders'</span>)
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">Promise</span>.all(
+      intents.map(<span class="hljs-function">(<span class="hljs-params">{ address, makerToken, takerToken }</span>) =&gt;</span> {
+        <span class="hljs-keyword">const</span> payload = AirSwap.makeRPC(<span class="hljs-string">'getOrder'</span>, {
+          makerToken,
+          takerToken,
+          <span class="hljs-attr">takerAddress</span>: <span class="hljs-keyword">this</span>.wallet.address.toLowerCase(),
+          <span class="hljs-attr">makerAmount</span>: <span class="hljs-built_in">String</span>(makerAmount),
+        })</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-47">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-47">&#182;</a>
+              </div>
+              <p><code>Promise.all</code> will return a complete array of resolved promises, or just the first rejection if a promise fails.
+To mitigate this, we <code>catch</code> errors on individual promises so that <code>Promise.all</code> always returns a complete array</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function">(<span class="hljs-params">res, rej</span>) =&gt;</span> <span class="hljs-keyword">this</span>.call(address, payload, res, rej)).catch(<span class="hljs-function"><span class="hljs-params">e</span> =&gt;</span> e)
+      }),
+    )
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-48">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-48">&#182;</a>
+              </div>
+              <h2 id="interacting-with-ethereum">Interacting with Ethereum</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-49">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-49">&#182;</a>
+              </div>
+              
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-50">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-50">&#182;</a>
               </div>
               <p>Return a signed <code>order</code> object for a taker to fill</p>
 
@@ -874,11 +945,11 @@ To mitigate this, we <code>catch</code> errors on individual promises so that <c
         </li>
         
         
-        <li id="section-45">
+        <li id="section-51">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-45">&#182;</a>
+                <a class="pilcrow" href="#section-51">&#182;</a>
               </div>
               <p>Submit a signed <code>order</code> object by calling <code>fill</code> on the AirSwap smart contract
 Optionally pass an object to configure gas settings and amount of ether sent
@@ -915,11 +986,11 @@ returns a <code>Promise</code></p>
         </li>
         
         
-        <li id="section-46">
+        <li id="section-52">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-46">&#182;</a>
+                <a class="pilcrow" href="#section-52">&#182;</a>
               </div>
               <p>Unwrap <code>amount</code> of W-ETH
 Optionally pass an object to configure gas settings
@@ -935,11 +1006,11 @@ returns a <code>Promise</code></p>
         </li>
         
         
-        <li id="section-47">
+        <li id="section-53">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-47">&#182;</a>
+                <a class="pilcrow" href="#section-53">&#182;</a>
               </div>
               <p>Give the AirSwap smart contract permission to transfer an ERC20 token
 Must call <code>approveTokenSpender</code> one time for each token you want to trade

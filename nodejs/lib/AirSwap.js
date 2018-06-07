@@ -12,16 +12,11 @@ const INDEXER_ADDRESS = '0x0000000000000000000000000000000000000000'
 // Class Constructor
 // ----------------
 class AirSwap {
-  // `privateKey`: string - ethereum private key with `"0x"` prepended
-
-  // `infuraKey`: string - infura API key
-
-  // `nodeAddress`: string - optionally specify a geth/parity node instead of using infura
-
-  // `rpcActions`: Object - user defined methods; called by peers via JSON-RPC
-
-  // `networkId`: string - which ethereum network is used; `'rinkeby'` or `'mainnet'`
-
+  // * `privateKey`: `string` - ethereum private key with `"0x"` prepended
+  // * `infuraKey`: `string` - infura API key
+  // * `nodeAddress`: `string` - optionally specify a geth/parity node instead of using infura
+  // * `rpcActions`: `Object` - user defined methods; called by peers via JSON-RPC
+  // * `networkId`: `string` - which ethereum network is used; `'rinkeby'` or `'mainnet'`
   constructor(config) {
     const { privateKey, infuraKey, nodeAddress, rpcActions = {}, networkId = 'rinkeby' } = config
     const networkName = networkId === 'mainnet' ? 'homestead' : 'rinkeby'
@@ -226,7 +221,7 @@ class AirSwap {
   // ----------------
 
   // Query the indexer for trade intents.
-  // Returns a promise which is resolved with an array of `intents`
+  // * returns a `Promise` which is resolved with an array of `intents`
   findIntents(makerTokens, takerTokens, role = 'maker') {
     if (!makerTokens || !takerTokens) {
       throw new Error('missing arguments makerTokens or takerTokens')
@@ -240,7 +235,8 @@ class AirSwap {
     return new Promise((resolve, reject) => this.call(INDEXER_ADDRESS, payload, resolve, reject))
   }
 
-  // Call `setIntents` on the indexer with an array of trade `intent` objects
+  // Call `setIntents` on the indexer with an array of trade `intent` objects.
+  // * returns a `Promise` with the indexer response. Passes `'OK'` if succcessful.
   setIntents(intents) {
     const payload = AirSwap.makeRPC('setIntents', {
       address: this.wallet.address.toLowerCase(),
@@ -322,9 +318,9 @@ class AirSwap {
     }
   }
 
-  // Submit a signed `order` object by calling `fill` on the AirSwap smart contract
-  // Optionally pass an object to configure gas settings and amount of ether sent
-  // returns a `Promise`
+  // Submit a signed `order` object by calling `fill` on the AirSwap smart contract.
+  // * optionally pass an object to configure gas settings and amount of ether sent
+  // * returns a `Promise`
   fillOrder(order, config = {}) {
     const { value, gasLimit = 160000, gasPrice = utils.parseEther('0.000000014') } = config
 
@@ -351,25 +347,25 @@ class AirSwap {
     )
   }
 
-  // Unwrap `amount` of W-ETH
-  // Optionally pass an object to configure gas settings
-  // returns a `Promise`
+  // Unwrap `amount` of W-ETH.
+  // * optionally pass an object to configure gas settings
+  // * returns a `Promise`
   unwrapWeth(amount, config = {}) {
     const { gasLimit = 160000, gasPrice = utils.parseEther('0.000000014') } = config
     return this.wethContract.withdraw(utils.parseEther(String(amount)), { gasLimit, gasPrice })
   }
 
-  // Give the AirSwap smart contract permission to transfer an ERC20 token
-  // Must call `approveTokenSpender` one time for each token you want to trade
-  // Optionally pass an object to configure gas settings
-  // returns a `Promise`
-  approveTokenSpender(tokenContractAddr, config = {}) {
+  // Give the AirSwap smart contract permission to transfer an ERC20 token.
+  // * Must call `approveTokenForTrade` one time for each token you want to trade
+  // * Optionally pass an object to configure gas settings
+  // * returns a `Promise`
+  approveTokenForTrade(tokenContractAddr, config = {}) {
     const { gasLimit = 160000, gasPrice = utils.parseEther('0.000000014') } = config
     const tokenContract = new Contract(tokenContractAddr, erc20, this.wallet)
 
     return tokenContract.approve(
       this.exchangeContract.address.toLowerCase(),
-      '90071992547409910000000000',
+      '1000000000000000000000000000', // large approval amount so we don't have to approve ever again
       { gasLimit, gasPrice },
     )
   }

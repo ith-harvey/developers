@@ -30,21 +30,22 @@ airswap
       .then(orders => {
         console.log('Got orders:', orders)
 
-        // Warning: The example below will attempt to execute a trade for 10 AST regardless of price
-        // You should always check the `takerAmount` and `makerAmount` to make sure it's a fair trade!
+        /* Warning: The example below will attempt to execute a trade for 10 AST regardless of price
+         * You should always check the `takerAmount` and `makerAmount` to make sure it's a fair trade!
 
-        // const [order] = orders.filter(
-        //   o =>
-        //     o.code !== -1 && o.makerAddress.toLowerCase() !== airswap.wallet.address.toLowerCase(),
-        // )
-        // if (order) {
-        //   airswap
-        //     .fillOrder(order, { value: order.takerAmount })
-        //     .then(r => {
-        //       console.log('Order fill success:', r.hash)
-        //     })
-        //     .catch(e => console.error('Order fill failure:', e))
-        // }
+         const [order] = orders.filter(
+           o =>
+             o.code !== -1 && o.makerAddress.toLowerCase() !== airswap.wallet.address.toLowerCase(),
+         )
+         if (order) {
+           airswap
+             .fillOrder(order, { value: order.takerAmount })
+             .then(r => {
+               console.log('Order fill success:', r.hash)
+             })
+             .catch(e => console.error('Order fill failure:', e))
+        */
+
         airswap.disconnect()
       })
       .catch(e => {

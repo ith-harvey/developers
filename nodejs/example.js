@@ -45,6 +45,7 @@ airswap
         //     })
         //     .catch(e => console.error('Order fill failure:', e))
         // }
+        airswap.disconnect()
       })
       .catch(e => {
         throw e

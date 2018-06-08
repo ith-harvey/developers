@@ -30,7 +30,7 @@
               
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">const</span> AirSwap = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./AirSwap.js'</span>)
+            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">const</span> AirSwap = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./lib/AirSwap.js'</span>)
 
 <span class="hljs-keyword">const</span> config = {
   <span class="hljs-attr">privateKey</span>: process.env.PRIVATE_KEY,
@@ -53,7 +53,9 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>airswap.connect(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {</pre></div></div>
+            <div class="content"><div class='highlight'><pre>airswap
+  .connect()
+  .then(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {</pre></div></div>
             
         </li>
         
@@ -68,16 +70,16 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  airswap
-    .findIntents(
-      [<span class="hljs-string">'0x27054b13b1b798b345b591a4d22e6562d47ea75a'</span>], <span class="hljs-comment">// AST</span>
-      [<span class="hljs-string">'0x0000000000000000000000000000000000000000'</span>], <span class="hljs-comment">// ETH</span>
-      <span class="hljs-string">'maker'</span>, <span class="hljs-comment">// role</span>
-    )
-    .then(<span class="hljs-function"><span class="hljs-params">intents</span> =&gt;</span> {
-      <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Got Intents:'</span>, intents)
-      <span class="hljs-keyword">return</span> intents
-    })</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    airswap
+      .findIntents(
+        [<span class="hljs-string">'0x27054b13b1b798b345b591a4d22e6562d47ea75a'</span>], <span class="hljs-comment">// AST</span>
+        [<span class="hljs-string">'0x0000000000000000000000000000000000000000'</span>], <span class="hljs-comment">// ETH</span>
+        <span class="hljs-string">'maker'</span>, <span class="hljs-comment">// role</span>
+      )
+      .then(<span class="hljs-function"><span class="hljs-params">intents</span> =&gt;</span> {
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Got Intents:'</span>, intents)
+        <span class="hljs-keyword">return</span> intents
+      })</pre></div></div>
             
         </li>
         
@@ -92,7 +94,7 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    .then(airswap.getOrders)</pre></div></div>
+            <div class="content"><div class='highlight'><pre>      .then(<span class="hljs-function"><span class="hljs-params">intents</span> =&gt;</span> airswap.getOrders(intents, <span class="hljs-number">100000</span>))</pre></div></div>
             
         </li>
         
@@ -108,10 +110,30 @@ If we want to fill an order, we just have to sign the transaction and submit it 
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>    .then(<span class="hljs-function"><span class="hljs-params">orders</span> =&gt;</span> {
-      <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Got Orders:'</span>, orders)
-    })
-    .catch(<span class="hljs-built_in">console</span>.error)</pre></div></div>
+            <div class="content"><div class='highlight'><pre>      .then(<span class="hljs-function"><span class="hljs-params">orders</span> =&gt;</span> {
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'Got orders:'</span>, orders)
+
+        <span class="hljs-comment">/* Warning: The example below will attempt to execute a trade for 10 AST regardless of price
+         * You should always check the `takerAmount` and `makerAmount` to make sure it's a fair trade!
+
+         const [order] = orders.filter(
+           o =&gt;
+             o.code !== -1 &amp;&amp; o.makerAddress.toLowerCase() !== airswap.wallet.address.toLowerCase(),
+         )
+         if (order) {
+           airswap
+             .fillOrder(order, { value: order.takerAmount })
+             .then(r =&gt; {
+               console.log('Order fill success:', r.hash)
+             })
+             .catch(e =&gt; console.error('Order fill failure:', e))
+        */</span>
+
+        airswap.disconnect()
+      })
+      .catch(<span class="hljs-function"><span class="hljs-params">e</span> =&gt;</span> {
+        <span class="hljs-keyword">throw</span> e
+      })</pre></div></div>
             
         </li>
         
@@ -126,16 +148,20 @@ If we want to fill an order, we just have to sign the transaction and submit it 
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  airswap
-    .setIntents([
-      {
-        <span class="hljs-attr">makerToken</span>: <span class="hljs-string">'0x27054b13b1b798b345b591a4d22e6562d47ea75a'</span>,
-        <span class="hljs-attr">takerToken</span>: <span class="hljs-string">'0x0000000000000000000000000000000000000000'</span>,
-        <span class="hljs-attr">role</span>: <span class="hljs-string">'maker'</span>,
-      },
-    ])
-    .then(<span class="hljs-built_in">console</span>.log)
-    .catch(<span class="hljs-built_in">console</span>.error)</pre></div></div>
+            <div class="content"><div class='highlight'><pre>    airswap
+      .setIntents([
+        {
+          <span class="hljs-attr">makerToken</span>: <span class="hljs-string">'0x27054b13b1b798b345b591a4d22e6562d47ea75a'</span>,
+          <span class="hljs-attr">takerToken</span>: <span class="hljs-string">'0x0000000000000000000000000000000000000000'</span>,
+          <span class="hljs-attr">role</span>: <span class="hljs-string">'maker'</span>,
+        },
+      ])
+      .then(
+        <span class="hljs-function"><span class="hljs-params">r</span> =&gt;</span> (r === <span class="hljs-string">'ok'</span> ? <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'setIntents sucess'</span>) : <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'setIntents failure'</span>)),
+      )
+      .catch(<span class="hljs-function"><span class="hljs-params">e</span> =&gt;</span> {
+        <span class="hljs-keyword">throw</span> e
+      })</pre></div></div>
             
         </li>
         
@@ -146,29 +172,42 @@ If we want to fill an order, we just have to sign the transaction and submit it 
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-7">&#182;</a>
               </div>
-              <p>Implement your own methods to handle RPC calls from other peers</p>
+              <p>Implement your own methods to handle RPC calls from other peers
+This getOrder example is hardcoded to offer 1 AST for 0.001 ETH</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  airswap.RPC_METHOD_ACTIONS.getOrder = <span class="hljs-function"><span class="hljs-params">msg</span> =&gt;</span> {
-    <span class="hljs-keyword">const</span> { makerAddress, makerAmount, makerToken, takerAddress, takerAmount, takerToken } = msg.params
-    <span class="hljs-keyword">const</span> nonce = <span class="hljs-built_in">Math</span>.round(<span class="hljs-built_in">Math</span>.random() * <span class="hljs-built_in">Date</span>.now())
-    <span class="hljs-keyword">const</span> expiration = <span class="hljs-built_in">Date</span>.now() + <span class="hljs-number">30000</span>
+            <div class="content"><div class='highlight'><pre>    airswap.RPC_METHOD_ACTIONS.getOrder = <span class="hljs-function"><span class="hljs-params">msg</span> =&gt;</span> {
+      <span class="hljs-keyword">const</span> {
+        makerAddress,
+        makerAmount,
+        makerToken,
+        takerAddress,
+        takerAmount,
+        takerToken,
+      } = msg.params
+      <span class="hljs-keyword">const</span> nonce = <span class="hljs-built_in">String</span>(<span class="hljs-built_in">Math</span>.round(<span class="hljs-built_in">Math</span>.random() * <span class="hljs-built_in">Date</span>.now()))
+      <span class="hljs-keyword">const</span> expiration = <span class="hljs-built_in">Date</span>.now() + <span class="hljs-number">30000</span>
 
-    <span class="hljs-keyword">const</span> signedOrder = airswap.signOrder({
-      <span class="hljs-attr">makerAddress</span>: airswap.wallet.address.toLowerCase(),
-      <span class="hljs-attr">makerAmount</span>: <span class="hljs-string">'100'</span>,
-      makerToken,
-      takerAddress,
-      <span class="hljs-attr">takerAmount</span>: <span class="hljs-string">'100000'</span>,
-      takerToken,
-      nonce,
-      expiration,
-    })
-
-    airswap.call(takerAddress, { <span class="hljs-attr">id</span>: msg.id, <span class="hljs-attr">jsonrpc</span>: <span class="hljs-string">'2.0'</span>, <span class="hljs-attr">result</span>: signedOrder })
-  }
-})</pre></div></div>
+      <span class="hljs-keyword">const</span> signedOrder = airswap.signOrder({
+        <span class="hljs-attr">makerAddress</span>: airswap.wallet.address.toLowerCase(),
+        <span class="hljs-attr">makerAmount</span>: <span class="hljs-string">'10000'</span>,
+        makerToken,
+        takerAddress,
+        <span class="hljs-attr">takerAmount</span>: <span class="hljs-string">'1000000000000000'</span>,
+        takerToken,
+        nonce,
+        expiration,
+      })
+      airswap.call(
+        takerAddress, <span class="hljs-comment">// send order to address who requested it</span>
+        { <span class="hljs-attr">id</span>: msg.id, <span class="hljs-attr">jsonrpc</span>: <span class="hljs-string">'2.0'</span>, <span class="hljs-attr">result</span>: signedOrder }, <span class="hljs-comment">// response id should match their `msg.id`</span>
+      )
+    }
+  })
+  .catch(<span class="hljs-function"><span class="hljs-params">e</span> =&gt;</span> {
+    <span class="hljs-keyword">throw</span> e
+  })</pre></div></div>
             
         </li>
         

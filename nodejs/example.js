@@ -48,9 +48,7 @@ airswap
 
         airswap.disconnect()
       })
-      .catch(e => {
-        throw e
-      })
+      .catch(console.error)
 
     // Publish an array of trade intents to the indexer
     airswap
@@ -64,9 +62,7 @@ airswap
       .then(
         r => (r === 'ok' ? console.log('setIntents sucess') : console.log('setIntents failure')),
       )
-      .catch(e => {
-        throw e
-      })
+      .catch(console.error)
 
     // Implement your own methods to handle RPC calls from other peers
     // This getOrder example is hardcoded to offer 1 AST for 0.001 ETH

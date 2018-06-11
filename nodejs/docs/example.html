@@ -131,9 +131,7 @@ If we want to fill an order, we just have to sign the transaction and submit it 
 
         airswap.disconnect()
       })
-      .catch(<span class="hljs-function"><span class="hljs-params">e</span> =&gt;</span> {
-        <span class="hljs-keyword">throw</span> e
-      })</pre></div></div>
+      .catch(<span class="hljs-built_in">console</span>.error)</pre></div></div>
             
         </li>
         
@@ -159,9 +157,7 @@ If we want to fill an order, we just have to sign the transaction and submit it 
       .then(
         <span class="hljs-function"><span class="hljs-params">r</span> =&gt;</span> (r === <span class="hljs-string">'ok'</span> ? <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'setIntents sucess'</span>) : <span class="hljs-built_in">console</span>.log(<span class="hljs-string">'setIntents failure'</span>)),
       )
-      .catch(<span class="hljs-function"><span class="hljs-params">e</span> =&gt;</span> {
-        <span class="hljs-keyword">throw</span> e
-      })</pre></div></div>
+      .catch(<span class="hljs-built_in">console</span>.error)</pre></div></div>
             
         </li>
         

@@ -3,6 +3,7 @@ const ethers = require('ethers')
 const erc20 = require('human-standard-token-abi')
 const exchange = require('./exchangeABI.json')
 const weth = require('./wethABI.json')
+const uuid = require('uuid4')
 
 const { Contract, Wallet, utils, providers } = ethers
 
@@ -67,7 +68,7 @@ class AirSwap {
   // ----------------
 
   // Prepare a formatted query to be submitted as a JSON-RPC call
-  static makeRPC(method, params = {}, id = Date.now()) {
+  static makeRPC(method, params = {}, id = uuid()) {
     return {
       jsonrpc: '2.0',
       method,
@@ -83,7 +84,7 @@ class AirSwap {
       sender: this.wallet.address.toLowerCase(),
       receiver,
       message: JSON.stringify(message),
-      id: Date.now(),
+      id: uuid(),
     })
     this.socket.send(messageString)
 

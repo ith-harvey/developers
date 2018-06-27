@@ -66,6 +66,8 @@ Either `buy` or `sell`. This will restrict the mode to buy or sell.
 
 A fixed `token` to `buy` in exchange for ETH or `sell` in exchange for WETH.
 
+**Note: you can not pass an arbitrary ERC20 address to the widget and expect it to work. Currently the widget will only trade tokens that are found on https://www.airswap.io/trade. If you are running a market maker for an unsupported ERC20 token, you must implement your own front end interface for users to get and fill orders.**
+
 #### `string` amount
 
 A default `amount` in the smallest unit e.g. Wei. Can be edited by the user.

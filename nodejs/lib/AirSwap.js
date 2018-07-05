@@ -277,8 +277,8 @@ class AirSwap {
     takerAddress,
     takerAmount,
     takerToken,
-    nonce,
     expiration,
+    nonce,
   }) {
     const types = [
       'address', // makerAddress
@@ -287,8 +287,8 @@ class AirSwap {
       'address', // takerAddress
       'uint256', // takerAmount
       'address', // takertoken
-      'uint256', // nonce
       'uint256', // expiration
+      'uint256', // nonce
     ]
     const hashedOrder = utils.solidityKeccak256(types, [
       makerAddress,
@@ -297,12 +297,12 @@ class AirSwap {
       takerAddress,
       takerAmount,
       takerToken,
-      nonce,
       expiration,
+      nonce,
     ])
 
-    const signature = this.wallet.signMessage(ethers.utils.arrayify(hashedOrder))
-    const walletSignature = signature.substr(2, signature.length)
+    const signedMsg = this.wallet.signMessage(ethers.utils.arrayify(hashedOrder))
+    const sig = ethers.utils.splitSignature(signedMsg)
 
     return {
       makerAddress,
@@ -313,9 +313,7 @@ class AirSwap {
       takerToken,
       expiration,
       nonce,
-      v: parseFloat(walletSignature.substr(128, 2)) + 27,
-      r: `0x${walletSignature.substr(0, 64)}`,
-      s: `0x${walletSignature.substr(64, 64)}`,
+      ...sig,
     }
   }
 
@@ -323,19 +321,19 @@ class AirSwap {
   // * optionally pass an object to configure gas settings and amount of ether sent
   // * returns a `Promise`
   fillOrder(order, config = {}) {
-    const { value, gasLimit = 160000, gasPrice = utils.parseEther('0.000000014') } = config
+    const { value, gasLimit = 160000, gasPrice = utils.parseEther('0.000000040') } = config
 
     if (!order.nonce) {
       throw new Error('bad order object')
     }
     return this.exchangeContract.fill(
       order.makerAddress,
-      utils.bigNumberify(order.makerAmount).toString(),
+      order.makerAmount,
       order.makerToken,
       order.takerAddress,
-      utils.bigNumberify(order.takerAmount).toString(),
+      order.takerAmount,
       order.takerToken,
-      utils.bigNumberify(order.expiration).toString(),
+      order.expiration,
       order.nonce,
       order.v,
       order.r,
@@ -352,7 +350,7 @@ class AirSwap {
   // * optionally pass an object to configure gas settings
   // * returns a `Promise`
   unwrapWeth(amount, config = {}) {
-    const { gasLimit = 160000, gasPrice = utils.parseEther('0.000000014') } = config
+    const { gasLimit = 160000, gasPrice = utils.parseEther('0.000000040') } = config
     return this.wethContract.withdraw(utils.parseEther(String(amount)), { gasLimit, gasPrice })
   }
 
@@ -361,7 +359,7 @@ class AirSwap {
   // * Optionally pass an object to configure gas settings
   // * returns a `Promise`
   approveTokenForTrade(tokenContractAddr, config = {}) {
-    const { gasLimit = 160000, gasPrice = utils.parseEther('0.000000014') } = config
+    const { gasLimit = 160000, gasPrice = utils.parseEther('0.000000040') } = config
     const tokenContract = new Contract(tokenContractAddr, erc20, this.wallet)
 
     return tokenContract.approve(

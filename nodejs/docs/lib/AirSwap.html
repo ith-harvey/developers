@@ -35,6 +35,7 @@
 <span class="hljs-keyword">const</span> erc20 = <span class="hljs-built_in">require</span>(<span class="hljs-string">'human-standard-token-abi'</span>)
 <span class="hljs-keyword">const</span> exchange = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./exchangeABI.json'</span>)
 <span class="hljs-keyword">const</span> weth = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./wethABI.json'</span>)
+<span class="hljs-keyword">const</span> uuid = <span class="hljs-built_in">require</span>(<span class="hljs-string">'uuid4'</span>)
 
 <span class="hljs-keyword">const</span> { Contract, Wallet, utils, providers } = ethers
 
@@ -279,7 +280,7 @@
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">static</span> makeRPC(method, params = {}, id = <span class="hljs-built_in">Date</span>.now()) {
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-keyword">static</span> makeRPC(method, params = {}, id = uuid()) {
     <span class="hljs-keyword">return</span> {
       <span class="hljs-attr">jsonrpc</span>: <span class="hljs-string">'2.0'</span>,
       method,
@@ -307,7 +308,7 @@ Optionally pass <code>resolve</code> and <code>reject</code> callbacks to handle
       <span class="hljs-attr">sender</span>: <span class="hljs-keyword">this</span>.wallet.address.toLowerCase(),
       receiver,
       <span class="hljs-attr">message</span>: <span class="hljs-built_in">JSON</span>.stringify(message),
-      <span class="hljs-attr">id</span>: <span class="hljs-built_in">Date</span>.now(),
+      <span class="hljs-attr">id</span>: uuid(),
     })
     <span class="hljs-keyword">this</span>.socket.send(messageString)</pre></div></div>
             
@@ -858,8 +859,8 @@ To mitigate this, we <code>catch</code> errors on individual promises so that <c
     takerAddress,
     takerAmount,
     takerToken,
-    nonce,
     expiration,
+    nonce,
   }) {
     <span class="hljs-keyword">const</span> types = [
       <span class="hljs-string">'address'</span>, <span class="hljs-comment">// makerAddress</span>
@@ -868,8 +869,8 @@ To mitigate this, we <code>catch</code> errors on individual promises so that <c
       <span class="hljs-string">'address'</span>, <span class="hljs-comment">// takerAddress</span>
       <span class="hljs-string">'uint256'</span>, <span class="hljs-comment">// takerAmount</span>
       <span class="hljs-string">'address'</span>, <span class="hljs-comment">// takertoken</span>
-      <span class="hljs-string">'uint256'</span>, <span class="hljs-comment">// nonce</span>
       <span class="hljs-string">'uint256'</span>, <span class="hljs-comment">// expiration</span>
+      <span class="hljs-string">'uint256'</span>, <span class="hljs-comment">// nonce</span>
     ]
     <span class="hljs-keyword">const</span> hashedOrder = utils.solidityKeccak256(types, [
       makerAddress,
@@ -878,12 +879,12 @@ To mitigate this, we <code>catch</code> errors on individual promises so that <c
       takerAddress,
       takerAmount,
       takerToken,
-      nonce,
       expiration,
+      nonce,
     ])
 
-    <span class="hljs-keyword">const</span> signature = <span class="hljs-keyword">this</span>.wallet.signMessage(ethers.utils.arrayify(hashedOrder))
-    <span class="hljs-keyword">const</span> walletSignature = signature.substr(<span class="hljs-number">2</span>, signature.length)
+    <span class="hljs-keyword">const</span> signedMsg = <span class="hljs-keyword">this</span>.wallet.signMessage(ethers.utils.arrayify(hashedOrder))
+    <span class="hljs-keyword">const</span> sig = ethers.utils.splitSignature(signedMsg)
 
     <span class="hljs-keyword">return</span> {
       makerAddress,
@@ -894,9 +895,7 @@ To mitigate this, we <code>catch</code> errors on individual promises so that <c
       takerToken,
       expiration,
       nonce,
-      <span class="hljs-attr">v</span>: <span class="hljs-built_in">parseFloat</span>(walletSignature.substr(<span class="hljs-number">128</span>, <span class="hljs-number">2</span>)) + <span class="hljs-number">27</span>,
-      <span class="hljs-attr">r</span>: <span class="hljs-string">`0x<span class="hljs-subst">${walletSignature.substr(<span class="hljs-number">0</span>, <span class="hljs-number">64</span>)}</span>`</span>,
-      <span class="hljs-attr">s</span>: <span class="hljs-string">`0x<span class="hljs-subst">${walletSignature.substr(<span class="hljs-number">64</span>, <span class="hljs-number">64</span>)}</span>`</span>,
+      ...sig,
     }
   }</pre></div></div>
             
@@ -918,19 +917,19 @@ To mitigate this, we <code>catch</code> errors on individual promises so that <c
             </div>
             
             <div class="content"><div class='highlight'><pre>  fillOrder(order, config = {}) {
-    <span class="hljs-keyword">const</span> { value, gasLimit = <span class="hljs-number">160000</span>, gasPrice = utils.parseEther(<span class="hljs-string">'0.000000014'</span>) } = config
+    <span class="hljs-keyword">const</span> { value, gasLimit = <span class="hljs-number">160000</span>, gasPrice = utils.parseEther(<span class="hljs-string">'0.000000040'</span>) } = config
 
     <span class="hljs-keyword">if</span> (!order.nonce) {
       <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'bad order object'</span>)
     }
     <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.exchangeContract.fill(
       order.makerAddress,
-      utils.bigNumberify(order.makerAmount).toString(),
+      order.makerAmount,
       order.makerToken,
       order.takerAddress,
-      utils.bigNumberify(order.takerAmount).toString(),
+      order.takerAmount,
       order.takerToken,
-      utils.bigNumberify(order.expiration).toString(),
+      order.expiration,
       order.nonce,
       order.v,
       order.r,
@@ -961,7 +960,7 @@ To mitigate this, we <code>catch</code> errors on individual promises so that <c
             </div>
             
             <div class="content"><div class='highlight'><pre>  unwrapWeth(amount, config = {}) {
-    <span class="hljs-keyword">const</span> { gasLimit = <span class="hljs-number">160000</span>, gasPrice = utils.parseEther(<span class="hljs-string">'0.000000014'</span>) } = config
+    <span class="hljs-keyword">const</span> { gasLimit = <span class="hljs-number">160000</span>, gasPrice = utils.parseEther(<span class="hljs-string">'0.000000040'</span>) } = config
     <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.wethContract.withdraw(utils.parseEther(<span class="hljs-built_in">String</span>(amount)), { gasLimit, gasPrice })
   }</pre></div></div>
             
@@ -984,7 +983,7 @@ To mitigate this, we <code>catch</code> errors on individual promises so that <c
             </div>
             
             <div class="content"><div class='highlight'><pre>  approveTokenForTrade(tokenContractAddr, config = {}) {
-    <span class="hljs-keyword">const</span> { gasLimit = <span class="hljs-number">160000</span>, gasPrice = utils.parseEther(<span class="hljs-string">'0.000000014'</span>) } = config
+    <span class="hljs-keyword">const</span> { gasLimit = <span class="hljs-number">160000</span>, gasPrice = utils.parseEther(<span class="hljs-string">'0.000000040'</span>) } = config
     <span class="hljs-keyword">const</span> tokenContract = <span class="hljs-keyword">new</span> Contract(tokenContractAddr, erc20, <span class="hljs-keyword">this</span>.wallet)
 
     <span class="hljs-keyword">return</span> tokenContract.approve(

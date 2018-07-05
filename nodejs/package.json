@@ -4,6 +4,9 @@
   "description": "AirSwap Node.js API Example",
   "main": "example.js",
   "author": "graham@airswap.io",
+  "scripts": {
+    "lint": "eslint example.js lib/AirSwap.js"
+  },
   "dependencies": {
     "ethers": "^3.0.19",
     "human-standard-token-abi": "^1.0.2",

@@ -66,8 +66,6 @@ Either `buy` or `sell`. This will restrict the mode to buy or sell.
 
 A fixed `token` to `buy` in exchange for ETH or `sell` in exchange for WETH.
 
-**Note: you can not pass an arbitrary ERC20 address to the widget and expect it to work. Currently the widget will only trade tokens that are found on https://www.airswap.io/trade. If you are running a market maker for an unsupported ERC20 token, you must implement your own front end interface for users to get and fill orders.**
-
 #### `string` amount
 
 A default `amount` in the smallest unit e.g. Wei. Can be edited by the user.
@@ -91,3 +89,10 @@ Called when the transaction sent to the blockchain has succeeded. The transactio
 ```
 function onComplete(transactionId) { console.log('Complete!', transactionId); }
 ```
+
+## Adding New Tokens
+
+You can add an intent to trade any token to the indexer, as long as the token associated with an intent isn’t blacklisted.
+The [AirSwap UI](https://www.airswap.io/trade) is powered by [this metadata endpoint](https://token-metadata.airswap.io/tokens). Tokens will automatically be added to this metadata endpoint when they are posted to the indexer (on a half hour cron). The `airswapUI` flag on the token will be changed from `new` to `yes` after a check by us to make sure newly listed tokens aren’t blacklisted.
+
+[Rinkeby tokens can be found here](https://token-metadata.airswap.io/rinkebyTokens). New Rinkeby tokens are added on request.

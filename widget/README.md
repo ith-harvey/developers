@@ -74,7 +74,7 @@ A default `amount` in the smallest unit e.g. Wei. Can be edited by the user.
 
 A fixed `address` to query a specific counter-party for orders.
 
-#### `function` onCancel
+#### `required` `function` onCancel
 
 A function called when the user has canceled or dismissed the widget. No arguments.
 
@@ -82,7 +82,7 @@ A function called when the user has canceled or dismissed the widget. No argumen
 function onCancel() { console.log('Canceled!'); }
 ```
 
-#### `function` onComplete
+#### `required` `function` onComplete
 
 Called when the transaction sent to the blockchain has succeeded. The transaction ID is passed as an argument.
 

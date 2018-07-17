@@ -187,9 +187,7 @@
             </div>
             
             <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">this</span>.socketUrl =
-      networkId === <span class="hljs-string">'mainnet'</span>
-        ? <span class="hljs-string">'wss://connect.airswap-api.com/websocket'</span>
-        : <span class="hljs-string">'wss://sandbox.airswap-api.com/websocket'</span></pre></div></div>
+      networkId === <span class="hljs-string">'mainnet'</span> ? <span class="hljs-string">'wss://connect.airswap-api.com/websocket'</span> : <span class="hljs-string">'wss://sandbox.airswap-api.com/websocket'</span></pre></div></div>
             
         </li>
         
@@ -754,6 +752,28 @@ about the connection state after the authentication handshake</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-41">&#182;</a>
               </div>
+              <p>Call <code>getIntents</code> on the indexer to return a list of tokens that the specified address has published intent to trade</p>
+<ul>
+<li>parameter <code>address</code> is a lowercased Ethereum address to fetch intents for</li>
+<li>returns a <code>Promise</code> which is resolved with an array of intents</li>
+</ul>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  getIntents(address) {
+    <span class="hljs-keyword">const</span> payload = AirSwap.makeRPC(<span class="hljs-string">'getIntents'</span>, { address })
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve, reject</span>) =&gt;</span> <span class="hljs-keyword">this</span>.call(INDEXER_ADDRESS, payload, resolve, reject))
+  }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-42">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-42">&#182;</a>
+              </div>
               <p>Call <code>setIntents</code> on the indexer with an array of trade <code>intent</code> objects.</p>
 <ul>
 <li>returns a <code>Promise</code> with the indexer response. Passes <code>&#39;OK&#39;</code> if succcessful.</li>
@@ -772,11 +792,11 @@ about the connection state after the authentication handshake</p>
         </li>
         
         
-        <li id="section-42">
+        <li id="section-43">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-42">&#182;</a>
+                <a class="pilcrow" href="#section-43">&#182;</a>
               </div>
               <p>Make a JSON-RPC <code>getOrder</code> call for each <code>intent</code></p>
 
@@ -798,11 +818,11 @@ about the connection state after the authentication handshake</p>
         </li>
         
         
-        <li id="section-43">
+        <li id="section-44">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-43">&#182;</a>
+                <a class="pilcrow" href="#section-44">&#182;</a>
               </div>
               <p><code>Promise.all</code> will return a complete array of resolved promises, or just the first rejection if a promise fails.
 To mitigate this, we <code>catch</code> errors on individual promises so that <code>Promise.all</code> always returns a complete array</p>
@@ -817,26 +837,14 @@ To mitigate this, we <code>catch</code> errors on individual promises so that <c
         </li>
         
         
-        <li id="section-44">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-44">&#182;</a>
-              </div>
-              <h2 id="interacting-with-ethereum">Interacting with Ethereum</h2>
-
-            </div>
-            
-        </li>
-        
-        
         <li id="section-45">
             <div class="annotation">
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-45">&#182;</a>
               </div>
-              
+              <h2 id="interacting-with-ethereum">Interacting with Ethereum</h2>
+
             </div>
             
         </li>
@@ -848,20 +856,23 @@ To mitigate this, we <code>catch</code> errors on individual promises so that <c
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-46">&#182;</a>
               </div>
+              
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-47">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-47">&#182;</a>
+              </div>
               <p>Return a signed <code>order</code> object for a taker to fill</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  signOrder({
-    makerAddress,
-    makerAmount,
-    makerToken,
-    takerAddress,
-    takerAmount,
-    takerToken,
-    expiration,
-    nonce,
-  }) {
+            <div class="content"><div class='highlight'><pre>  signOrder({ makerAddress, makerAmount, makerToken, takerAddress, takerAmount, takerToken, expiration, nonce }) {
     <span class="hljs-keyword">const</span> types = [
       <span class="hljs-string">'address'</span>, <span class="hljs-comment">// makerAddress</span>
       <span class="hljs-string">'uint256'</span>, <span class="hljs-comment">// makerAmount</span>
@@ -902,11 +913,11 @@ To mitigate this, we <code>catch</code> errors on individual promises so that <c
         </li>
         
         
-        <li id="section-47">
+        <li id="section-48">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-47">&#182;</a>
+                <a class="pilcrow" href="#section-48">&#182;</a>
               </div>
               <p>Submit a signed <code>order</code> object by calling <code>fill</code> on the AirSwap smart contract.</p>
 <ul>
@@ -945,11 +956,11 @@ To mitigate this, we <code>catch</code> errors on individual promises so that <c
         </li>
         
         
-        <li id="section-48">
+        <li id="section-49">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-48">&#182;</a>
+                <a class="pilcrow" href="#section-49">&#182;</a>
               </div>
               <p>Unwrap <code>amount</code> of W-ETH.</p>
 <ul>
@@ -967,11 +978,11 @@ To mitigate this, we <code>catch</code> errors on individual promises so that <c
         </li>
         
         
-        <li id="section-49">
+        <li id="section-50">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-49">&#182;</a>
+                <a class="pilcrow" href="#section-50">&#182;</a>
               </div>
               <p>Give the AirSwap smart contract permission to transfer an ERC20 token.</p>
 <ul>

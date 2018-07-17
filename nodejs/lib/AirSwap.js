@@ -45,9 +45,7 @@ class AirSwap {
 
     // Set the websocket url based on environment
     this.socketUrl =
-      networkId === 'mainnet'
-        ? 'wss://connect.airswap-api.com/websocket'
-        : 'wss://sandbox.airswap-api.com/websocket'
+      networkId === 'mainnet' ? 'wss://connect.airswap-api.com/websocket' : 'wss://sandbox.airswap-api.com/websocket'
 
     // Websocket authentication state
     this.isAuthenticated = false
@@ -236,6 +234,14 @@ class AirSwap {
     return new Promise((resolve, reject) => this.call(INDEXER_ADDRESS, payload, resolve, reject))
   }
 
+  // Call `getIntents` on the indexer to return a list of tokens that the specified address has published intent to trade
+  // * parameter `address` is a lowercased Ethereum address to fetch intents for
+  // * returns a `Promise` which is resolved with an array of intents
+  getIntents(address) {
+    const payload = AirSwap.makeRPC('getIntents', { address })
+    return new Promise((resolve, reject) => this.call(INDEXER_ADDRESS, payload, resolve, reject))
+  }
+
   // Call `setIntents` on the indexer with an array of trade `intent` objects.
   // * returns a `Promise` with the indexer response. Passes `'OK'` if succcessful.
   setIntents(intents) {
@@ -270,16 +276,7 @@ class AirSwap {
   // ----------------
 
   // Return a signed `order` object for a taker to fill
-  signOrder({
-    makerAddress,
-    makerAmount,
-    makerToken,
-    takerAddress,
-    takerAmount,
-    takerToken,
-    expiration,
-    nonce,
-  }) {
+  signOrder({ makerAddress, makerAmount, makerToken, takerAddress, takerAmount, takerToken, expiration, nonce }) {
     const types = [
       'address', // makerAddress
       'uint256', // makerAmount

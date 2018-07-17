@@ -234,9 +234,9 @@ class AirSwap {
     return new Promise((resolve, reject) => this.call(INDEXER_ADDRESS, payload, resolve, reject))
   }
 
-  // Call `getIntents` on the indexer to return a list of tokens that the specified address has published intent to trade
+  // Call `getIntents` on the indexer to return an array of tokens that the specified address has published intent to trade
   // * parameter `address` is a lowercased Ethereum address to fetch intents for
-  // * returns a `Promise` which is resolved with an array of intents
+  // * returns a `Promise` which is resolved with getan array of intents
   getIntents(address) {
     const payload = AirSwap.makeRPC('getIntents', { address })
     return new Promise((resolve, reject) => this.call(INDEXER_ADDRESS, payload, resolve, reject))
@@ -252,7 +252,28 @@ class AirSwap {
     return new Promise((resolve, reject) => this.call(INDEXER_ADDRESS, payload, resolve, reject))
   }
 
-  // Make a JSON-RPC `getOrder` call for each `intent`
+  // Make a JSON-RPC `getOrder` call on a maker and recieve back a signed order (or a timeout if they fail to respond)
+  // * `makerAddress`: `string` - the maker address to request an order from
+  // * `params`: `Object` - order parameters. Must specify 1 of either `makerAmount` or `takerAmount`. Must also specify `makerToken` and `takerToken` addresses
+  getOrder(makerAddress, params) {
+    const { makerAmount, takerAmount, makerToken, takerToken } = params
+    const BadArgumentsError = new Error('bad arguments passed to getOrder')
+
+    if (!makerAmount && !takerAmount) throw BadArgumentsError
+    if (makerAmount && takerAmount) throw BadArgumentsError
+    if (!takerToken || !makerToken) throw BadArgumentsError
+
+    const payload = AirSwap.makeRPC('getOrder', {
+      makerToken,
+      takerToken,
+      takerAddress: this.wallet.address.toLowerCase(),
+      makerAmount: makerAmount ? String(makerAmount) : null,
+      takerAmount: takerAmount ? String(takerAmount) : null,
+    })
+    return new Promise((res, rej) => this.call(makerAddress, payload, res, rej))
+  }
+
+  // Given an array of trade intents, make a JSON-RPC `getOrder` call for each `intent`
   getOrders(intents, makerAmount) {
     if (!Array.isArray(intents) || !makerAmount) {
       throw new Error('bad arguments passed to getOrders')

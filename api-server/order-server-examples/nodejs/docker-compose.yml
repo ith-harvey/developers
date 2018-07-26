@@ -1,0 +1,7 @@
+version: '3'
+services:
+  order-server:
+    build:
+      context: .
+    ports:
+      - 5004:5004

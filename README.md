@@ -1,11 +1,11 @@
 
 # AirSwap for Developers
-[AirSwap](https://airswap.io/) is a peer-to-peer Ethereum token marketplace. Peers discover each other through search and connect to make trades. The AirSwap APIs follow the [Swap Protocol](https://swap.tech/whitepaper). Learn more by visiting the [AirSwap website](https://airswap.io/).
+[AirSwap](https://airswap.io/) is a peer-to-peer network for trading Ethereum tokens. Peers discover each other through search and connect to make trades. The AirSwap APIs follow the [Swap Protocol](https://swap.tech/whitepaper). Learn more by visiting the [AirSwap website](https://airswap.io/). The AirSwap developers offering currently consists of two main components: the Widget and the API Server
 
 ## :warning: Warning
 
 ### Read the terms of use.
-This is a developer preview and subject to change. The following APIs are in use in production on the AirSwap network. We are sharing these APIs and code samples publicly with our community to build and iterate on them. By connecting to and using the AirSwap services you accept the [AirSwap Terms of Use](https://swap.tech/airswap-terms-of-use.pdf). Please also be sure to review the [LICENSE](LICENSE).
+The following APIs are in use in production on the AirSwap network. We are sharing these APIs and code samples publicly with our community to build and iterate on them. By connecting to and using the AirSwap services you accept the [AirSwap Terms of Use](https://swap.tech/airswap-terms-of-use.pdf). Please also be sure to review the [LICENSE](LICENSE).
 
 ### Start with the Rinkeby sandbox.
 An important part of our developer system is the Rinkeby sandbox. By connecting, you can make trades without spending real ether. By default the Widget API will connect to the **Rinkeby** sandbox which loads the frontend located at https://sandbox.airswap.io/. To set your widget to make trades on **Mainnet** set the `env` parameter to `production`.
@@ -18,7 +18,10 @@ Be sure to join the AirSwap Developers Telegram group at https://t.me/airswapdev
 ## AirSwap Widget API
 The AirSwap trading widget can be embedded in any webpage with just a few lines of code. See live examples on [Bounty0x](https://alpha.bounty0x.io/bounties) and [AdChain](https://publisher.adchain.com/domains). To add token trading to your web app, simply drop in the `JavaScript` library into your webpage and try out the examples found in the [widget](widget) folder.
 
-## AirSwap Trading API
+## AirSwap API Server
+AirSwap provides an API server that you can run locally to interact with all of the API methods. Developers can interact with the API over HTTP using any programming language. Prospective order makers will need to implement an Order Server in order to receive `getOrder` requests that are forwarded from the API Server. Further explanation and documentation for each endpoint can be found in the [api-server](api-server) folder. Order Server reference implementations are also available in NodeJS, Python, and Go.
+
+## AirSwap API Overview
 The AirSwap Trading API is an implementation of the [Swap Protocol](https://swap.tech/whitepaper).
 
 * [Introduction](#introduction)
@@ -27,7 +30,6 @@ The AirSwap Trading API is an implementation of the [Swap Protocol](https://swap
   * [Makers and takers](#makers-and-takers)
   * [Intent to trade](#intent-to-trade)
   * [Index utility](#index-utility)
-  * [Remote procedure calls](#remote-procedure-calls)
 * [Using the messaging system](#using-the-messaging-system)
 * [Getting and providing orders](#getting-and-providing-orders)
   * [getOrder](#getorder)
@@ -43,10 +45,9 @@ The AirSwap Trading API is an implementation of the [Swap Protocol](https://swap
 * [Getting support](#getting-support)
 
 ## Introduction
-The [Swap Protocol](https://swap.tech/whitepaper) outlines peer-to-peer protocols for trading Ethereum-based assets that conform to the [ERC-20](https://en.wikipedia.org/wiki/ERC20) token standard. The protocol whitepaper does not specify the transports or data formats to be used in order to remain flexible. However, our implementation, [AirSwap](https://airswap.io/), does conform to the specifications described below.
+The [Swap Protocol](https://swap.tech/whitepaper) outlines peer-to-peer protocols for trading Ethereum-based assets that conform to the [ERC-20](https://en.wikipedia.org/wiki/ERC20) token standard. The protocol whitepaper does not specify the transports or data formats to be used in order to remain flexible. However, our implementation, [AirSwap](https://airswap.io/), does conform to the specifications described below. 
 
-### Quick start
-For a quick start, take a look at the `Python` or `Node.js` examples found in the [python](python) or [nodejs](nodejs) folders.
+**The following is a detailed overview of the API with some low level technical explanations.** If you just want to get started quickly, head over to the [API Server](api-server), which provides a user friendly HTTP interface for all of the methods described below.
 
 ### Concepts
 
@@ -56,7 +57,7 @@ On the Ethereum network, ERC20 tokens are smart contracts that implement functio
 
 #### Makers and takers
 
-For the purposes of this document, a `maker` is one who constructs and signs orders, as specified in the [Swap Peer Protocol](https://swap.tech/whitepaper#peer-protocol). A `taker` likewise is an order taker. These are different than market makers and market takers, which make and take markets, but may take or make orders. On the AirSwap Network, you may take the role of `maker` or `taker`.
+For the purposes of this document, a `maker` is one who constructs and signs orders, as specified in the [Swap Peer Protocol](https://swap.tech/whitepaper#peer-protocol). A `taker` likewise is an order taker. These are different than order makers and takers, which make and take markets, but may take or make orders. On the AirSwap Network, you may take the role of `maker` or `taker`.
 
 **At time of writing, the AirSwap Indexer only supports the market `maker` role.** You must indicate the role of `maker` when announcing your intent to trade. Makers sign and send orders, takers accept and fill them. Takers have the option to fill an order, but they pay the gas to execute the Ethereum transaction and complete the trade.
 
@@ -87,14 +88,6 @@ Would translate to "I intend to `make` orders, trading my `0xc778...` tokens for
 #### Index utility
 
 To set your intent to trade, you must hold a minimum balance of **AirSwap Token (AST)** for each intent you hold on the Indexer. Today that amount is `250 AST` and is subject to change. Read more about the AirSwap Token on the [AirSwap Blog](https://blog.airswap.io/the-airswap-token-42855fe5e120).
-
-#### Remote procedure calls
-
-To invoke methods on other peers and services on the network, messages take the form of [JSON-RPC 2.0](http://www.jsonrpc.org/specification). These JSON structures can be sent over a variety of transports like WebSockets and HTTP.
-
-## Using the messaging system
-
-The messaging system is used as a convenience for peers to connect and communicate with other peers and network services like the Indexer. The interface to the messaging system is a WebSocket, for which many [client libraries](https://github.com/facundofarias/awesome-websockets) exist in most programming languages. For an example of how to use the messaging system with the Indexer API, see [indexer_example.py](python/indexer_example.py).
 
 #### Authentication
 
@@ -132,7 +125,7 @@ The [Swap Peer Protocol](https://swap.tech/whitepaper#peer-protocol) specifies a
 
 ### getOrder
 
-To fill the role of `maker` on the network, you must implement the `getOrder` method. As a `taker` you will call this method on other peers. For an example of how to sign orders, see the [sign_order.py](python/sign_order.py) example.
+To fill the role of `maker` on the network, you must implement the `getOrder` method. As a `taker` you will call this method on other peers. For an example of how to sign orders, see the `signOrder` method in the [NodeJS library](api-server/lib/AirSwap.js).
 
 **Parameters**  
 All parameters are strings. Amounts must be in the base unit of the asset, e.g. `wei` rather than `ether`.
@@ -255,7 +248,7 @@ And its response, simply an "ok" if all goes well:
 ```
 
 ### getIntents
-You can fetch the intent configuration for any peer to see what they've announced for trade. For an example of how to call `getIntents` on the Indexer, see [indexer_example.py](python/indexer_example.py) or [example.js](nodejs/example.js).
+You can fetch the intent configuration for any peer to see what they've announced for trade. For an example of how to call `getIntents` on the Indexer, see the `getIntents` method in the [NodeJS library](api-server/lib/AirSwap.js).
 
 **Parameters**
 * `address`: A **lowercased** Ethereum address to fetch intent for.

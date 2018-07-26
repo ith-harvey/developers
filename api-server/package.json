@@ -1,0 +1,24 @@
+{
+  "name": "airswap-api-server",
+  "version": "1.0.0",
+  "description": "AirSwap Node.js API Client Server",
+  "main": "server.js",
+  "author": "AirSwap",
+  "scripts": {
+    "lint": "eslint server.js lib/AirSwap.js"
+  },
+  "dependencies": {
+    "ethers": "^3.0.19",
+    "express": "^4.16.3",
+    "human-standard-token-abi": "^1.0.2",
+    "request": "^2.87.0",
+    "request-promise": "^4.2.2",
+    "uuid4": "^1.0.0",
+    "ws": "^5.2.0"
+  },
+  "devDependencies": {
+    "eslint": "^4.19.1",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-plugin-import": "^2.7.0"
+  }
+}

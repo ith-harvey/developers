@@ -124,6 +124,7 @@ class AirSwap {
         if (this.isAlive === false) {
           console.log('no response for 30s; closing')
           this.terminate()
+          process.exit(1)
         }
         this.isAlive = false
         this.ping()
@@ -236,7 +237,7 @@ class AirSwap {
 
   // Call `getIntents` on the indexer to return an array of tokens that the specified address has published intent to trade
   // * parameter `address` is a lowercased Ethereum address to fetch intents for
-  // * returns a `Promise` which is resolved with getan array of intents
+  // * returns a `Promise` which is resolved with an array of intents set by a specific address
   getIntents(address) {
     const payload = AirSwap.makeRPC('getIntents', { address })
     return new Promise((resolve, reject) => this.call(INDEXER_ADDRESS, payload, resolve, reject))

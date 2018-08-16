@@ -278,7 +278,7 @@ All endpoints only accept POST requests with a JSON body.
     "takerAmount": "2993000000000000",
     "takerToken": "0x0000000000000000000000000000000000000000",
     "expiration": 1532447264,
-    "nonce": "33382012",
+    "nonce": "33382012"
   }'
   ```
 

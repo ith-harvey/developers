@@ -10,10 +10,10 @@ const tokenContractAddress = '0xcc1cbd4f67cceb7c001bd4adf98451237a193ff8'
 const tokenDecimals = 4
 
 // how many tokens is the bot trying to buy
-const tokenAmount = 100
+let tokenAmount = 100
 
 // how much ETH should the bot be willing to spend
-const ethAmount = 0.01
+let ethAmount = 0.01
 
 // get the token multiplier based on number of decimal places
 const tokenMultiplier = (() => {
@@ -25,11 +25,11 @@ const tokenMultiplier = (() => {
   return num
 })()
 
-// amount of tokens in smallest denomination
-const tokenAmount = BN(tokenAmount).times(BN(tokenMultiplier))
+// convert amount of tokens to smallest denomination
+tokenAmount = BN(tokenAmount).times(BN(tokenMultiplier))
 
-// amount of ETH in smallest denomination
-const ethAmount = BN(ETH_AMOUNT).times(BN('1000000000000000000'))
+// convert amount of ETH to smallest denomination
+ethAmount = BN(ethAmount).times(BN('1000000000000000000'))
 
 async function init() {
   try {

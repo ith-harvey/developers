@@ -3,25 +3,39 @@ const BN = require('bignumber.js')
 
 const host = 'http://localhost:5005'
 
-const { ETH_AMOUNT, TOKEN_AMOUNT, TOKEN_DECIMALS } = process.env
+// which token should the bot request orders for?
+const tokenContractAddress = '0xcc1cbd4f67cceb7c001bd4adf98451237a193ff8'
 
+// how many decimals does this token have? (you can check the contract on etherscan)
+const tokenDecimals = 4
+
+// how many tokens is the bot trying to buy
+const tokenAmount = 100
+
+// how much ETH should the bot be willing to spend
+const ethAmount = 0.01
+
+// get the token multiplier based on number of decimal places
 const tokenMultiplier = (() => {
-  if (TOKEN_DECIMALS === 1) return 1
+  if (tokenDecimals === 1) return 1
   let num = '1'
-  for (let i = 0; i < TOKEN_DECIMALS; i++) {
+  for (let i = 0; i < tokenDecimals; i++) {
     num += '0'
   }
   return num
 })()
 
-const tokenAmount = BN(TOKEN_AMOUNT).times(BN(tokenMultiplier))
+// amount of tokens in smallest denomination
+const tokenAmount = BN(tokenAmount).times(BN(tokenMultiplier))
+
+// amount of ETH in smallest denomination
 const ethAmount = BN(ETH_AMOUNT).times(BN('1000000000000000000'))
 
 async function init() {
   try {
     // get intents from makers who are trading our desired token
     const intentsRes = await axios.post(`${host}/findIntents`, {
-      makerTokens: ['0xcc1cbd4f67cceb7c001bd4adf98451237a193ff8'],
+      makerTokens: [tokenContractAddress],
       takerTokens: ['0x0000000000000000000000000000000000000000'],
     })
 

@@ -64,7 +64,11 @@ Either `buy` or `sell`. This will restrict the mode to buy or sell.
 
 #### `required` `string` token
 
-A fixed `token` to `buy` in exchange for ETH or `sell` in exchange for WETH.
+A fixed `token` to `buy` in exchange for ETH (or `baseToken`) or `sell` in exchange for WETH (or `baseToken`).
+
+#### `string` baseToken
+
+By default, the widget will search for trades in `'ETH'`. If you specify the string `'DAI'` for this parameter, the widget will search for `token`/`DAI` orders instead of `token`/`ETH` orders. **Note: you will likely need to run an order server until more peers on the network start making DAI orders. At the time of writing, most makers are only serving ETH orders**
 
 #### `string` amount
 

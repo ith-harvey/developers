@@ -1,5 +1,7 @@
 ## AirSwap Widget API
 
+![AirSwap Widget](http://g.recordit.co/uf9740sONS.gif 'airswap gif')
+
 The AirSwap Widget is an embeddable trading frontend that lets your users make ERC20 trades without leaving your application. The `demo.html` file shows usage of the Widget API on the **Rinkeby** sandbox. Keep in mind there may not be active peers using the sandbox at any given time. Join the AirSwap Developers Telegram group at https://t.me/airswapdevs or the AirSwap Community at https://t.me/airswap for conversation and support.
 
 To try the demo, run the following:

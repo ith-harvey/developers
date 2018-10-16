@@ -5,11 +5,11 @@
 
 - Developer API
 
-  - [Introduction](./DeveloperAPI/introduction.md)
-  - [Concepts](./DeveloperAPI/concepts.md)
-  - [Getting and Providing Orders](./DeveloperAPI/getting-and-providing-orders.md)
-  - [Using the Indexer](./DeveloperAPI/using-the-indexer.md)
-  - [Using Ethereum](./DeveloperAPI/using-ethereum.md)
+  - [Introduction](./developerAPI/introduction.md)
+  - [Concepts](./developerAPI/concepts.md)
+  - [Getting and Providing Orders](./developerAPI/getting-and-providing-orders.md)
+  - [Using the Indexer](./developerAPI/using-the-indexer.md)
+  - [Using Ethereum](./developerAPI/using-ethereum.md)
 
 - API Server
 

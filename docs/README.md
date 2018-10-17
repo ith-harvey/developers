@@ -1,4 +1,4 @@
-<center> ![alt text](./assets/logo/AirSwap-Developer-Tools-Logo.svg) </center>
+<center> ![alt text](./assets/logo/AirSwap-Developer-Tools-Logo.png) </center>
 
 ## What is AirSwap?
 

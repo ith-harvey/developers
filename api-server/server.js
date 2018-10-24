@@ -145,4 +145,4 @@ app.post(
 )
 
 // Connect to AirSwap and listen for POSTs
-airswap.connect({ reconnect: true })
+airswap.connect()

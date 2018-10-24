@@ -136,7 +136,7 @@ class AirSwap {
   // 2. Receive a challenge (some random data to sign)
   // 3. Sign the data and send it back over the wire
   // 4. Receive an "ok" and start sending and receiving RPC
-  connect({ reconnect } = {}) {
+  connect(reconnect = true) {
     this.socket = new WebSocket(this.socketUrl)
 
     // Check socket health every 30 seconds
@@ -149,7 +149,7 @@ class AirSwap {
       this.interval = setInterval(() => {
         if (this.isAlive === false) {
           console.log('no response for 30s; closing socket')
-          this.terminate()
+          this.close()
         }
         this.isAlive = false
         this.ping()
@@ -163,7 +163,7 @@ class AirSwap {
       if (reconnect) {
         console.log('socket closed; attempting reconnect in 10s')
         setTimeout(() => {
-          this.connect({ reconnect })
+          this.connect()
         }, 10000)
       } else {
         console.log('socket closed')

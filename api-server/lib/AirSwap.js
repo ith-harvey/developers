@@ -19,14 +19,22 @@ class AirSwap {
   // * `rpcActions`: `Object` - user defined methods; called by peers via JSON-RPC
   // * `networkId`: `string` - which ethereum network is used; `'rinkeby'` or `'mainnet'`
   constructor(config) {
-    const { privateKey, infuraKey, nodeAddress, rpcActions = {}, networkId = 'rinkeby' } = config
+    const {
+      privateKey,
+      infuraKey,
+      nodeAddress,
+      rpcActions = {},
+      networkId = 'rinkeby',
+    } = config
     const networkName = networkId === 'mainnet' ? 'homestead' : 'rinkeby'
 
     // Create infura provider by default
     let provider = new providers.InfuraProvider(networkName, infuraKey)
 
     // If user specified, use a geth/parity node instead
-    provider = nodeAddress ? new providers.JsonRpcProvider(nodeAddress, networkName) : provider
+    provider = nodeAddress
+      ? new providers.JsonRpcProvider(nodeAddress, networkName)
+      : provider
 
     // Create an ethereum wallet object for signing orders
     this.wallet = new Wallet(privateKey, provider)
@@ -34,18 +42,36 @@ class AirSwap {
     // Create an AirSwap contract object based on environment
     this.exchangeContract =
       networkId === 'mainnet'
-        ? new Contract('0x8fd3121013a07c57f0d69646e86e7a4880b467b7', exchange.abi, this.wallet)
-        : new Contract('0x07fc7c43d8168a2730344e5cf958aaecc3b42b41', exchange.abi, this.wallet)
+        ? new Contract(
+            '0x8fd3121013a07c57f0d69646e86e7a4880b467b7',
+            exchange.abi,
+            this.wallet,
+          )
+        : new Contract(
+            '0x07fc7c43d8168a2730344e5cf958aaecc3b42b41',
+            exchange.abi,
+            this.wallet,
+          )
 
     // Create a W-ETH contract object based on environment
     this.wethContract =
       networkId === 'mainnet'
-        ? new Contract('0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', weth.abi, this.wallet)
-        : new Contract('0xc778417e063141139fce010982780140aa0cd5ab', weth.abi, this.wallet)
+        ? new Contract(
+            '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+            weth.abi,
+            this.wallet,
+          )
+        : new Contract(
+            '0xc778417e063141139fce010982780140aa0cd5ab',
+            weth.abi,
+            this.wallet,
+          )
 
     // Set the websocket url based on environment
     this.socketUrl =
-      networkId === 'mainnet' ? 'wss://connect.airswap-api.com/websocket' : 'wss://sandbox.airswap-api.com/websocket'
+      networkId === 'mainnet'
+        ? 'wss://connect.airswap-api.com/websocket'
+        : 'wss://sandbox.airswap-api.com/websocket'
 
     // Websocket authentication state
     this.isAuthenticated = false
@@ -110,7 +136,7 @@ class AirSwap {
   // 2. Receive a challenge (some random data to sign)
   // 3. Sign the data and send it back over the wire
   // 4. Receive an "ok" and start sending and receiving RPC
-  connect() {
+  connect(reconnect = true) {
     this.socket = new WebSocket(this.socketUrl)
 
     // Check socket health every 30 seconds
@@ -122,9 +148,8 @@ class AirSwap {
 
       this.interval = setInterval(() => {
         if (this.isAlive === false) {
-          console.log('no response for 30s; closing')
-          this.terminate()
-          process.exit(1)
+          console.log('no response for 30s; closing socket')
+          this.close()
         }
         this.isAlive = false
         this.ping()
@@ -132,10 +157,17 @@ class AirSwap {
     }
 
     // The connection was closed
-    this.socket.onclose = () => {
+    this.socket.onclose = e => {
       this.isAuthenticated = false
       clearInterval(this.socket.interval)
-      console.log('socket closed')
+      if (reconnect) {
+        console.log('socket closed; attempting reconnect in 10s')
+        setTimeout(() => {
+          this.connect()
+        }, 10000)
+      } else {
+        console.log('socket closed')
+      }
     }
 
     // There was an error on the connection
@@ -188,7 +220,10 @@ class AirSwap {
             }
           } else if (message.id) {
             // We have received a response from a method call.
-            const isError = Object.prototype.hasOwnProperty.call(message, 'error')
+            const isError = Object.prototype.hasOwnProperty.call(
+              message,
+              'error',
+            )
 
             if (!isError && message.result) {
               // Resolve the call if a resolver exists.
@@ -232,7 +267,9 @@ class AirSwap {
       role,
     })
 
-    return new Promise((resolve, reject) => this.call(INDEXER_ADDRESS, payload, resolve, reject))
+    return new Promise((resolve, reject) =>
+      this.call(INDEXER_ADDRESS, payload, resolve, reject),
+    )
   }
 
   // Call `getIntents` on the indexer to return an array of tokens that the specified address has published intent to trade
@@ -240,7 +277,9 @@ class AirSwap {
   // * returns a `Promise` which is resolved with an array of intents set by a specific address
   getIntents(address) {
     const payload = AirSwap.makeRPC('getIntents', { address })
-    return new Promise((resolve, reject) => this.call(INDEXER_ADDRESS, payload, resolve, reject))
+    return new Promise((resolve, reject) =>
+      this.call(INDEXER_ADDRESS, payload, resolve, reject),
+    )
   }
 
   // Call `setIntents` on the indexer with an array of trade `intent` objects.
@@ -250,7 +289,9 @@ class AirSwap {
       address: this.wallet.address.toLowerCase(),
       intents,
     })
-    return new Promise((resolve, reject) => this.call(INDEXER_ADDRESS, payload, resolve, reject))
+    return new Promise((resolve, reject) =>
+      this.call(INDEXER_ADDRESS, payload, resolve, reject),
+    )
   }
 
   // Make a JSON-RPC `getOrder` call on a maker and recieve back a signed order (or a timeout if they fail to respond)
@@ -289,7 +330,9 @@ class AirSwap {
         })
         // `Promise.all` will return a complete array of resolved promises, or just the first rejection if a promise fails.
         // To mitigate this, we `catch` errors on individual promises so that `Promise.all` always returns a complete array
-        return new Promise((res, rej) => this.call(address, payload, res, rej)).catch(e => e)
+        return new Promise((res, rej) =>
+          this.call(address, payload, res, rej),
+        ).catch(e => e)
       }),
     )
   }
@@ -298,7 +341,16 @@ class AirSwap {
   // ----------------
 
   // Return a signed `order` object for a taker to fill
-  signOrder({ makerAddress, makerAmount, makerToken, takerAddress, takerAmount, takerToken, expiration, nonce }) {
+  signOrder({
+    makerAddress,
+    makerAmount,
+    makerToken,
+    takerAddress,
+    takerAmount,
+    takerToken,
+    expiration,
+    nonce,
+  }) {
     const types = [
       'address', // makerAddress
       'uint256', // makerAmount
@@ -320,7 +372,9 @@ class AirSwap {
       nonce,
     ])
 
-    const signedMsg = this.wallet.signMessage(ethers.utils.arrayify(hashedOrder))
+    const signedMsg = this.wallet.signMessage(
+      ethers.utils.arrayify(hashedOrder),
+    )
     const sig = ethers.utils.splitSignature(signedMsg)
 
     return {
@@ -340,7 +394,11 @@ class AirSwap {
   // * optionally pass an object to configure gas settings and amount of ether sent
   // * returns a `Promise`
   fillOrder(order, config = {}) {
-    const { value, gasLimit = 160000, gasPrice = utils.parseEther('0.000000040') } = config
+    const {
+      value,
+      gasLimit = 160000,
+      gasPrice = utils.parseEther('0.000000040'),
+    } = config
 
     if (!order.nonce) {
       throw new Error('bad order object')
@@ -358,7 +416,9 @@ class AirSwap {
       order.r,
       order.s,
       {
-        value: value ? utils.bigNumberify(String(value)) : utils.parseEther('0'),
+        value: value
+          ? utils.bigNumberify(String(value))
+          : utils.parseEther('0'),
         gasLimit,
         gasPrice,
       },
@@ -369,8 +429,14 @@ class AirSwap {
   // * optionally pass an object to configure gas settings
   // * returns a `Promise`
   unwrapWeth(amount, config = {}) {
-    const { gasLimit = 160000, gasPrice = utils.parseEther('0.000000040') } = config
-    return this.wethContract.withdraw(utils.parseEther(String(amount)), { gasLimit, gasPrice })
+    const {
+      gasLimit = 160000,
+      gasPrice = utils.parseEther('0.000000040'),
+    } = config
+    return this.wethContract.withdraw(utils.parseEther(String(amount)), {
+      gasLimit,
+      gasPrice,
+    })
   }
 
   // Give the AirSwap smart contract permission to transfer an ERC20 token.
@@ -378,7 +444,10 @@ class AirSwap {
   // * Optionally pass an object to configure gas settings
   // * returns a `Promise`
   approveTokenForTrade(tokenContractAddr, config = {}) {
-    const { gasLimit = 160000, gasPrice = utils.parseEther('0.000000040') } = config
+    const {
+      gasLimit = 160000,
+      gasPrice = utils.parseEther('0.000000040'),
+    } = config
     const tokenContract = new Contract(tokenContractAddr, erc20, this.wallet)
 
     return tokenContract.approve(

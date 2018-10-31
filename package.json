@@ -7,7 +7,7 @@
     "docs:serve": "docsify serve ./docs"
   },
   "devDependencies": {
-   "docsify-cli": "^4.2.1"
- },
+    "docsify-cli": "^4.2.1"
+  },
   "license": "GNU"
 }

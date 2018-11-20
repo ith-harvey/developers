@@ -25,7 +25,10 @@ const asyncMiddleware = fn => (req, res, next) => {
 
 // Relay getOrder requests from other peers to the order server
 airswap.RPC_METHOD_ACTIONS.getOrder = msg => {
-  const { params } = msg
+  let { params } = msg
+  if(typeof params === 'string' && params.startsWith('-----BEGIN PGP MESSAGE-----')){
+    params = airswap.decryptPGPMessage(params)
+  }
   params.makerAddress = airswap.wallet.address
   rp({
     method: 'POST',
@@ -141,6 +144,22 @@ app.post(
     const { tokenContractAddr, config } = req.body
     const tx = await airswap.approveTokenForTrade(tokenContractAddr, config)
     sendResponse(res, tx)
+  }),
+)
+
+app.post(
+  '/registerPGPKey',
+  asyncMiddleware(async (req, res) => {
+    const tx = await airswap.registerPGPKey()
+    sendResponse(res, tx)
+  }),
+)
+
+app.post(
+  '/getPGPKey',
+  asyncMiddleware(async (req, res) => {
+    const r = await airswap.getPGPKey()
+    sendResponse(res, r)
   }),
 )
 

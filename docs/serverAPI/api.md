@@ -463,3 +463,46 @@ All endpoints only accept POST requests with a JSON body.
 
 - **Notes:**
   The `config` key in data params is optional.
+  
+## registerPGPKey
+
+---
+  
+- **URL**
+
+`/registerPGPKey`
+
+- **Sample Call:**
+
+```bash
+curl -X POST \
+  http://localhost:5005/registerPGPKey 
+```
+
+- **Sample Response:**
+
+- **Code:** 200 <br />
+- **Content:**
+
+```json
+{
+  "nonce": 150,
+  "gasPrice": {
+    "_bn": "9502f9000"
+  },
+  "gasLimit": {
+    "_bn": "27100"
+  },
+  "to": "0x9D7eFd45E45C575CafB25d49d43556f43EbE3456",
+  "value": {
+    "_bn": "0"
+  },
+  "data": "0xce09197e000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000317a62327268646a44736f5566646867757a4c735a3866426455504257364e78326a714c39334e565a594635547553677637000000000000000000000000000000",
+  "v": 43,
+  "r": "0x2c0370b3dde7e1bb6eff58095e00f7c671c82d465e713c133746fe0987f32efa",
+  "s": "0x6fcd36be59d3beeea4d9340633b3f371e39e161b84539be3c397e066c1601f1a",
+  "chainId": 4,
+  "from": "0xDead0717B16b9F56EB6e308E4b29230dc0eEE0B6",
+  "hash": "0x78b6fe986c550e878b32a02dd50e3376c02998eddfbea60c1ae933378a888e3"
+}
+```

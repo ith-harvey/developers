@@ -479,9 +479,9 @@ class AirSwap {
   async registerPGPKey(){
     const address = this.wallet.address
     this.signedSeed = this.wallet.signMessage(`I'm generating my encryption keys for AirSwap ${address}`)
-
-    if(this.pgpKeys[address]) {
-      return new Error('Key already set on PGP contract, should only be set once')
+    const existingKey = await this.getPGPKey(address)
+    if(existingKey) {
+      return 'Key already set on PGP contract, should only be set once'
     }
 
     const {privateKeyArmored, publicKeyArmored} = await openpgp.generateKey({
@@ -504,9 +504,14 @@ class AirSwap {
     if(this.pgpKeys[address]){
       return this.pgpKeys[address]
     } else {
-      const ipfsHash = await this.pgpContract.addressToPublicKey(this.wallet.address)
-      this.pgpKeys[address] = await ipfs.cat(ipfsHash)
-      return this.pgpKeys[address]
+      try {
+        const ipfsHash = await this.pgpContract.addressToPublicKey(this.wallet.address)
+        this.pgpKeys[address] = await ipfs.cat(ipfsHash)
+        return this.pgpKeys[address]
+      } catch (e) {
+        console.log('PGP key is not registered for this address')
+        return null
+      }
     }
   }
 

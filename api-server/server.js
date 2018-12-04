@@ -155,13 +155,5 @@ app.post(
   }),
 )
 
-app.post(
-  '/getPGPKey',
-  asyncMiddleware(async (req, res) => {
-    const r = await airswap.getPGPKey()
-    sendResponse(res, r)
-  }),
-)
-
 // Connect to AirSwap and listen for POSTs
 airswap.connect()

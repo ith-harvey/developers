@@ -3,12 +3,16 @@ const ethers = require('ethers')
 const erc20 = require('human-standard-token-abi')
 const exchange = require('./exchangeABI.json')
 const weth = require('./wethABI.json')
+const pgpABI = require('./pgpABI.json')
 const uuid = require('uuid4')
+const openpgp = require('openpgp')
 
 const { Contract, Wallet, utils, providers } = ethers
 
 const TIMEOUT = 12000
 const INDEXER_ADDRESS = '0x0000000000000000000000000000000000000000'
+const IPFS_URL = 'https://ipfs.infura.io:5001'
+const ipfs = require('nano-ipfs-store').at(IPFS_URL)
 
 // Class Constructor
 // ----------------
@@ -67,6 +71,18 @@ class AirSwap {
             this.wallet,
           )
 
+    this.pgpContract =
+      networkId === 'mainnet'
+        ? new Contract(
+        '0xa6a52efd0e0387756bc0ef10a34dd723ac408a30',
+        pgpABI,
+        this.wallet,
+        )
+        : new Contract(
+        '0x9d7efd45e45c575cafb25d49d43556f43ebe3456',
+        pgpABI,
+        this.wallet,
+        )
     // Set the websocket url based on environment
     this.socketUrl =
       networkId === 'mainnet'
@@ -80,6 +96,8 @@ class AirSwap {
     this.RESOLVERS = {}
     this.REJECTORS = {}
     this.TIMEOUTS = {}
+    this.pgpKeys = {}
+    this.getPGPKey(this.wallet.address)
 
     // User defined methods that will be invoked by peers on the JSON-RPC
     this.RPC_METHOD_ACTIONS = rpcActions
@@ -455,6 +473,82 @@ class AirSwap {
       '1000000000000000000000000000', // large approval amount so we don't have to approve ever again
       { gasLimit, gasPrice },
     )
+  }
+
+  // registers a new PGP keyset on the contract for this wallet
+  async registerPGPKey(){
+    const address = this.wallet.address
+    this.signedSeed = this.wallet.signMessage(`I'm generating my encryption keys for AirSwap ${address}`)
+    const existingKey = await this.getPGPKey(address)
+    if(existingKey) {
+      return 'Key already set on PGP contract, should only be set once'
+    }
+
+    const {privateKeyArmored, publicKeyArmored} = await openpgp.generateKey({
+      userIds: [{ address }],
+      curve: 'p256', // ECC curve name, most widely supported
+      passphrase: this.signedSeed,
+    })
+    const walletPGPKey = {privateKeyArmored, publicKeyArmored}
+    this.pgpKeys[address] = walletPGPKey
+    const ipfsHash = await ipfs.add(JSON.stringify(walletPGPKey))
+    return this.pgpContract.addPublicKey(ipfsHash, {
+      value: 0,
+      gasLimit: 160000,
+      gasPrice: utils.parseEther('0.000000040'),
+    })
+  }
+
+  // look up a PGP keyset by wallet address
+  async getPGPKey(address){
+    if(this.pgpKeys[address]){
+      return this.pgpKeys[address]
+    } else {
+      try {
+        const ipfsHash = await this.pgpContract.addressToPublicKey(this.wallet.address)
+        this.pgpKeys[address] = await ipfs.cat(ipfsHash)
+        return this.pgpKeys[address]
+      } catch (e) {
+        console.log('PGP key is not registered for this address')
+        return null
+      }
+    }
+  }
+
+  // decrypts a message intended for this wallet to read
+  async decryptMessage(encryptedMessage){
+    const walletKey = this.pgpKeys[this.wallet.address]
+    if(!walletKey) {
+      return new Error('PGP Key not set for this address')
+    }
+    const { keys } = await openpgp.key.readArmored(walletKey.private)
+    const privKeyObj = keys[0]
+    await privKeyObj.decrypt(this.signedSeed)
+    openpgp
+      .decrypt({
+        message: await openpgp.message.readArmored(encryptedMessage),
+        privateKeys: [privKeyObj],
+      })
+      .then(plaintext => {
+        return plaintext.data
+      })
+  }
+
+  // encrypts a message intended to be read by the owner of the wallet corresponding to the 'address'
+  async encryptMessage(message, address){
+    const key = this.getPGPKey(address)
+    if(!key){
+      return new Error('PGP Key not set for this address')
+    }
+    return openpgp
+      .encrypt({
+        message: openpgp.message.fromText(message), // input as Message object
+        publicKeys: (await openpgp.key.readArmored(key.public)).keys, // for encryption
+      })
+      .then(ciphertext => {
+        return ciphertext.data
+      })
+      .catch(reject)
   }
 }
 

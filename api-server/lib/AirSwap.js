@@ -457,6 +457,22 @@ class AirSwap {
     })
   }
 
+  // Wrap `amount` of W-ETH.
+  // * optionally pass an object to configure gas settings
+  // * returns a `Promise`
+  wrapWeth(amount, config = {}) {
+    const {
+      gasLimit = 160000,
+      gasPrice = utils.parseEther('0.000000040'),
+    } = config
+    console.log(utils.parseEther(String(amount)).toString())
+    return this.wethContract.deposit({
+      value: Number(amount),
+      gasLimit,
+      gasPrice,
+    })
+  }
+
   // Give the AirSwap smart contract permission to transfer an ERC20 token.
   // * Must call `approveTokenForTrade` one time for each token you want to trade
   // * Optionally pass an object to configure gas settings
@@ -477,7 +493,7 @@ class AirSwap {
 
   // registers a new PGP keyset on the contract for this wallet
   async registerPGPKey(){
-    const address = this.wallet.address
+    const address = this.wallet.address.toLowerCase()
     this.signedSeed = this.wallet.signMessage(`I'm generating my encryption keys for AirSwap ${address}`)
     const existingKey = await this.getPGPKey(address)
     if(existingKey) {
@@ -489,7 +505,10 @@ class AirSwap {
       curve: 'p256', // ECC curve name, most widely supported
       passphrase: this.signedSeed,
     })
-    const walletPGPKey = {privateKeyArmored, publicKeyArmored}
+    const walletPGPKey = {
+      private: privateKeyArmored,
+      public: publicKeyArmored
+    }
     this.pgpKeys[address] = walletPGPKey
     const ipfsHash = await ipfs.add(JSON.stringify(walletPGPKey))
     return this.pgpContract.addPublicKey(ipfsHash, {

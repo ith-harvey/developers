@@ -1,4 +1,4 @@
-const WebSocket = require('ws')
+const WebSocket = require('isomorphic-ws')
 const ethers = require('ethers')
 const erc20 = require('human-standard-token-abi')
 const exchange = require('./exchangeABI.json')
@@ -160,18 +160,21 @@ class AirSwap {
     // Check socket health every 30 seconds
     this.socket.onopen = function healthCheck() {
       this.isAlive = true
-      this.addEventListener('pong', () => {
-        this.isAlive = true
-      })
+      // trying to make this isomorphic, and ping/pong isn't supported in browser websocket api
+      if(this.ping) {
+        this.addEventListener('pong', () => {
+          this.isAlive = true
+        })
 
-      this.interval = setInterval(() => {
-        if (this.isAlive === false) {
-          console.log('no response for 30s; closing socket')
-          this.close()
-        }
-        this.isAlive = false
-        this.ping()
-      }, 30000)
+        this.interval = setInterval(() => {
+          if (this.isAlive === false) {
+            console.log('no response for 30s; closing socket')
+            this.close()
+          }
+          this.isAlive = false
+          this.ping()
+        }, 30000)
+      }
     }
 
     // The connection was closed
@@ -284,7 +287,6 @@ class AirSwap {
       takerTokens,
       role,
     })
-
     return new Promise((resolve, reject) =>
       this.call(INDEXER_ADDRESS, payload, resolve, reject),
     )

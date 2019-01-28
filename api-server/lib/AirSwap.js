@@ -336,8 +336,9 @@ class AirSwap {
   }
 
   // Given an array of trade intents, make a JSON-RPC `getOrder` call for each `intent`
-  getOrders(intents, makerAmount) {
-    if (!Array.isArray(intents) || !makerAmount) {
+  getOrders(intents, params) {
+    const {makerAmount, takerAmount} = params
+    if (!Array.isArray(intents) || !(makerAmount || takerAmount)) {
       throw new Error('bad arguments passed to getOrders')
     }
     return Promise.all(
@@ -346,7 +347,7 @@ class AirSwap {
           makerToken,
           takerToken,
           takerAddress: this.wallet.address.toLowerCase(),
-          makerAmount: String(makerAmount),
+          ...params,
         })
         // `Promise.all` will return a complete array of resolved promises, or just the first rejection if a promise fails.
         // To mitigate this, we `catch` errors on individual promises so that `Promise.all` always returns a complete array
@@ -417,7 +418,7 @@ class AirSwap {
     const {
       value,
       gasLimit = 160000,
-      gasPrice = utils.parseEther('0.000000040'),
+      gasPrice = utils.parseEther('0.000000002'),
     } = config
 
     if (!order.nonce) {

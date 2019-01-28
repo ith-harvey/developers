@@ -468,7 +468,6 @@ class AirSwap {
       gasLimit = 160000,
       gasPrice = utils.parseEther('0.000000040'),
     } = config
-    console.log(utils.parseEther(String(amount)).toString())
     return this.wethContract.deposit({
       value: Number(amount),
       gasLimit,

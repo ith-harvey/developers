@@ -139,6 +139,15 @@ app.post(
 )
 
 app.post(
+  '/wrapWeth',
+  asyncMiddleware(async (req, res) => {
+    const { amount, config } = req.body
+    const tx = await airswap.wrapWeth(amount, config)
+    sendResponse(res, tx)
+  }),
+)
+
+app.post(
   '/approveTokenForTrade',
   asyncMiddleware(async (req, res) => {
     const { tokenContractAddr, config } = req.body

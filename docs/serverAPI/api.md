@@ -335,6 +335,70 @@ All endpoints only accept POST requests with a JSON body.
       "hash": "0x9bac349471a0553abb9aa146ca68296c1987a57cdc8e1062be73fed95194aaf4"
   }
   ```
+## wrap WETH
+
+---
+
+- **URL**
+
+  `/wrapWeth`
+
+- **Data Params**
+
+  ```js
+  {
+    "amount": string,
+    "config": {
+      value: string,
+      gasLimit: number,
+      gasPrice: string
+    }
+  }
+  ```
+
+- **Sample Call:**
+
+  ```bash
+  curl -X POST \
+    http://localhost:5005/wrapWeth \
+    -H 'Content-Type: application/json' \
+    -d '{
+    "amount": "10000000000000000",
+    "config": {}
+  }'
+  ```
+
+- **Sample Response:**
+
+  - **Code:** 200 <br />
+  - **Content:**
+
+  ```json
+  {
+    "nonce": 21,
+    "gasPrice": {
+        "_bn": "9502f9000"
+    },
+    "gasLimit": {
+        "_bn": "27100"
+    },
+    "to": "0xc778417E063141139Fce010982780140Aa0cD5Ab",
+    "value": {
+        "_bn": "0"
+    },
+    "data": "0x2e1a7d4d000000000000000000000000000000000001ed09bead87c0378d8e6400000000",
+    "v": 44,
+    "r": "0x0bb55004cb08e6834881b64a503295a6030b8aab19806810ae9608c84aa7b2e9",
+    "s": "0x11e1094c6e00093577dacd433a752687c384f1c92f86a45e2992633046f9e1e7",
+    "chainId": 4,
+    "from": "0x61ba956Bb7D4e7146eFaf74Ccf327d213e96713C",
+    "hash": "0xb4de23394c51ca871e64f77ef3d7ac81f57fe93e58e87bc62cebb0c84da19e98"
+  }
+  ```
+
+- **Notes:**
+  `amount` must be denominated in WEI. The `config` key in data params is optional.
+
 
 ## unwrapWeth
 

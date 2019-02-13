@@ -1,5 +1,5 @@
 {
-  "name": "airswap-developer-docs",
+  "name": "@airswap/developers",
   "version": "1.0.0",
   "description": "AirSwap Developer Docs",
   "main": "./src/index.html",

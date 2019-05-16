@@ -32,7 +32,7 @@ airswap.RPC_METHOD_ACTIONS.getOrder = msg => {
   params.makerAddress = airswap.wallet.address
   rp({
     method: 'POST',
-    uri: 'http://localhost:5004/getOrder',
+    uri: 'http://airswap-keeper:5004/getOrder',
     json: true,
     body: params,
   }).then(orderParams => {
